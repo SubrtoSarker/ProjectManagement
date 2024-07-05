@@ -19,6 +19,7 @@
   <ItemGroup>
     <PackageReference Include="BootstrapBlazor" Version="8.*" />
     <PackageReference Include="BootstrapBlazor.FontAwesome" Version="8.*" />
+    <PackageReference Include="js-cookie" Version="2.2.1" />
   </ItemGroup>
 
 </Project>
