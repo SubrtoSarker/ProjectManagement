@@ -38,7 +38,7 @@ namespace ProjectManagement.Components.Shared
         {
             var menus = new List<MenuItem>
             {
-                new() { Text = "Home", Icon = "fa-solid fa-fw fa-home", Url = "/" , Match = NavLinkMatch.All},
+                new() { Text = "Home", Icon = "fa-solid fa-fw fa-home", Url = "/Home" , Match = NavLinkMatch.All},
                 new() { Text = "Counter", Icon = "fa-solid fa-fw fa-check-square", Url = "/counter" },
                 new() { Text = "Weather", Icon = "fa-solid fa-fw fa-database", Url = "/weather" },
                 new() { Text = "Table", Icon = "fa-solid fa-fw fa-table", Url = "/table" },

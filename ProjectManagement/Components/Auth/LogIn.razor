@@ -1,40 +1,39 @@
-﻿@page "/LogIn"
+﻿@page "/"
 @attribute [TabItemOption(Text = "LogIn")]
 @layout LogInLayout
 @using Models.User;
 @using Services;
 @using Services.Encription;
 @using Services.Auth;
+@using Services.Session
 @using Microsoft.JSInterop;
 @using System.Text.Json;
+@using NetcodeHub.Packages.Components.Validations.OnInput;
 @inject IAuthServices AuthServices;
 @inject IEncription enc;
 @inject IJSRuntime JSRuntime
 @inject NavigationManager nav
-@inject Services.Session.SessionServices session
+@inject Blazored.SessionStorage.ISessionStorageService sess
 
 <PageTitle>LogIn</PageTitle>
-<h2>Hi</h2>
-@* <section class="vh-100">
+<section class="vh-100">
     <div class="container-fluid h-custom">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-md-9 col-lg-6 col-xl-5">
                 <img src="Image/login.png" class="img-fluid" alt="Sample image">
             </div>
-            <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+            <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1 mt-10">
 
                 <EditForm Model="@log" OnValidSubmit="Login" class="needs-validation" novalidate>
                     <DataAnnotationsValidator />
                     <div class="mb-3">
-                        <InputText id="Email" type="email" class="form-control" @bind-Value="log.Email" Placeholder="1234" />
-                        <label for="Email" class="form-label">Enter Your Email Address</label>
-                        <ValidationMessage For="@(() => log.Email)" />
+                        <FloatingText id="Email" type="email" class="form-control" @bind-Value="log.Email" Placeholder="1234" Label="Enter Your Email Address" />
+                        <ValidationMessage class="text-danger" For="@(() => log.Email)" />
                     </div>
 
                     <div class="mb-3">
-                        <InputText id="Password" type="password" class="form-control" @bind-Value="log.Password" Placeholder="Password" />
-                        <label for="Password" class="form-label">Password</label>
-                        <ValidationMessage For="@(() => log.Password)" />
+                        <FloatingText id="Password" type="password" class="form-control" @bind-Value="log.Password" Placeholder="Password" Label="Password" />
+                        <ValidationMessage class="text-danger" For="@(() => log.Password)" />
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
                         <!-- Checkbox -->
@@ -65,12 +64,13 @@
         </div>
     </div>
 </section>
- *@
+
 @code {
     private LogInModel log = new LogInModel();
     private User user = new User();
-    private string errorMessage;
+    private string? errorMessage;
     private bool rememberMe;
+    public SessionServices session = new SessionServices();
 
     private async Task Login()
     {
@@ -94,16 +94,15 @@
         {
             try
             {
-                session.ClearSession();
                 session.UserID = user.UserID;
                 session.Name = user.UserName;
                 session.Phone = user.Phone;
                 session.Email = user.Email;
                 session.TeamID = user.TeamID;
                 session.TeamName = user.TeamName;
-                session.Boss = user.ISBoss ? "Yes" : "No";
-                session.Admin = user.ISAdmin ? "Yes" : "No";
-                session.Key = user.Token;
+                session.Boss = user.ISBoss;
+                session.Admin = user.ISAdmin;
+                await sess.SetItemAsync("sessio", session);
                 if (rememberMe)
                 {
                     string Email = enc.EncryptString(log.Email);
@@ -174,5 +173,14 @@
     protected override async Task OnInitializedAsync()
     {
         //await session.InitializeAsync();
+        session.UserID = 0;
+        session.Name = string.Empty;
+        session.Phone = string.Empty;
+        session.Email = string.Empty;
+        session.TeamID = 0;
+        session.TeamName = string.Empty;
+        session.Boss = false;
+        session.Admin = false;
+        await sess.SetItemAsync("sessio", session);
     }
 }

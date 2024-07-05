@@ -2,98 +2,21 @@
 {
     public class SessionServices
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public SessionServices(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
-        private int GetSessionInt(string key) =>
-            _httpContextAccessor.HttpContext.Session.GetInt32(key) ?? 0;
+        public int UserID {get; set;}
 
-        private void SetSessionInt(string key, int value) =>
-            _httpContextAccessor.HttpContext.Session.SetInt32(key, value);
+        public string Name { get; set; }
 
-        private string GetSessionString(string key) =>
-            _httpContextAccessor.HttpContext.Session.GetString(key);
+        public string Phone { get; set; }
 
-        private void SetSessionString(string key, string value) =>
-            _httpContextAccessor.HttpContext.Session.SetString(key, value);
+        public string Email { get; set; }
 
-        public int UserID
-        {
-            get => GetSessionInt("UserID");
-            set => SetSessionInt("UserID", value);
-        }
+        public int TeamID { get; set; }
 
-        public string Name
-        {
-            get => GetSessionString("Name");
-            set => SetSessionString("Name", value);
-        }
-        public string Phone
-        {
-            get => GetSessionString("Phone");
-            set => SetSessionString("Phone", value);
-        }
-        public string Email
-        {
-            get => GetSessionString("Email");
-            set => SetSessionString("Email", value);
-        }
+        public string TeamName { get; set; }
 
-        public int TeamID
-        {
-            get => GetSessionInt("TeamID");
-            set => SetSessionInt("TeamID", value);
-        }
+        public bool Boss { get; set; }
 
-        public string TeamName
-        {
-            get => GetSessionString("TeamName");
-            set => SetSessionString("TeamName", value);
-        }
-        public string Boss
-        {
-            get => GetSessionString("Boss");
-            set => SetSessionString("Boss", value);
-        }
-        public string Admin
-        {
-            get => GetSessionString("Admin");
-            set => SetSessionString("Admin", value);
-        }
-        public string Key
-        {
-            get => GetSessionString("Key");
-            set => SetSessionString("Key", value);
-        }
-        public async Task InitializeAsync()
-        {
-            try
-            {
-                //await Task.CompletedTask;
-                await Task.Delay(0);
-                UserID = 0;
-                Name = string.Empty;
-                Phone = string.Empty;
-                Email = string.Empty;
-                TeamID = 0;
-                TeamName = string.Empty;
-                Boss = string.Empty;
-                Admin = string.Empty;
-                Key = string.Empty;
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-           
-        }
-        public void ClearSession()
-        {
-            _httpContextAccessor.HttpContext.Session.Clear();
-        }
+        public bool Admin { get; set; }
     }
 }
