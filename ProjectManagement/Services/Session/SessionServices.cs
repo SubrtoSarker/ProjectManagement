@@ -1,4 +1,4 @@
-﻿namespace ProjectManagement.Services
+﻿namespace ProjectManagement.Services.Session
 {
     public class SessionServices
     {
@@ -70,16 +70,26 @@
         }
         public async Task InitializeAsync()
         {
-            await Task.CompletedTask;
-            UserID = 0;
-            Name = string.Empty;
-            Phone = string.Empty;
-            Email = string.Empty;
-            TeamID = 0;
-            TeamName = string.Empty;
-            Boss = string.Empty;
-            Admin = string.Empty;
-            Key = string.Empty;
+            try
+            {
+                //await Task.CompletedTask;
+                await Task.Delay(0);
+                UserID = 0;
+                Name = string.Empty;
+                Phone = string.Empty;
+                Email = string.Empty;
+                TeamID = 0;
+                TeamName = string.Empty;
+                Boss = string.Empty;
+                Admin = string.Empty;
+                Key = string.Empty;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+           
         }
         public void ClearSession()
         {

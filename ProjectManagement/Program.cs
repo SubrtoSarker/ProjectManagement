@@ -1,11 +1,17 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.SignalR;
 using ProjectManagement.Components;
 using ProjectManagement.Data;
+using ProjectManagement.Services;
+using ProjectManagement.Services.Auth;
+using ProjectManagement.Services.Encription;
+using ProjectManagement.Services.Project;
+using ProjectManagement.Services.Session;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
@@ -14,11 +20,44 @@ builder.Services.AddBootstrapBlazor();
 
 builder.Services.AddSingleton<WeatherForecastService>();
 
-// 增加 Table 数据服务操作类
+// Register Table demo data service
 builder.Services.AddTableDemoDataService();
 
-// 增加 SignalR 服务数据传输大小限制配置
-builder.Services.Configure<HubOptions>(option => option.MaximumReceiveMessageSize = null);
+// Configure SignalR options
+builder.Services.Configure<HubOptions>(options => options.MaximumReceiveMessageSize = null);
+
+// Register services
+builder.Services.AddSingleton<AuthServices>();
+builder.Services.AddHttpClient<IAuthServices, AuthServices>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5164/");
+});
+
+builder.Services.AddHttpClient<IProjectService, ProjectService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5164/");
+});
+
+builder.Services.AddScoped<IEncription, Encription>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
+builder.Services.AddScoped<SessionServices>();
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(2);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = "YourDefaultAuthenticationScheme";
+    options.DefaultChallengeScheme = "YourDefaultChallengeScheme";
+    // Add more authentication configurations as needed
+});
+
 
 var app = builder.Build();
 
@@ -29,8 +68,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles();
-
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
+app.UseSession();
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 

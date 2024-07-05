@@ -1,21 +1,21 @@
-﻿@page "/LogIn"
-@attribute [TabItemOption(Text = "LogIn")]
-@layout LogInLayout
+﻿@page "/Test"
+@* @layout LogInLayout *@
 @using Models.User;
 @using Services;
 @using Services.Encription;
 @using Services.Auth;
-@using Microsoft.JSInterop;
-@using System.Text.Json;
 @inject IAuthServices AuthServices;
 @inject IEncription enc;
 @inject IJSRuntime JSRuntime
 @inject NavigationManager nav
 @inject Services.Session.SessionServices session
+@using Microsoft.JSInterop;
+@using System.Text.Json;
+@attribute [TabItemOption(Text = "LogIn")]
 
-<PageTitle>LogIn</PageTitle>
-<h2>Hi</h2>
-@* <section class="vh-100">
+<PageTitle>Test LogIn</PageTitle>
+
+<section class="vh-100">
     <div class="container-fluid h-custom">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-md-9 col-lg-6 col-xl-5">
@@ -26,14 +26,14 @@
                 <EditForm Model="@log" OnValidSubmit="Login" class="needs-validation" novalidate>
                     <DataAnnotationsValidator />
                     <div class="mb-3">
-                        <InputText id="Email" type="email" class="form-control" @bind-Value="log.Email" Placeholder="1234" />
-                        <label for="Email" class="form-label">Enter Your Email Address</label>
+                        <InputText id="Email" type="email" class="form-control" @bind-Value="log.Email" Placeholder="1234" Label="Enter Your Email Address"></InputText>
+                        @* <FloatingText id="Email" type="email" class="form-control" @bind-Value="log.Email" Placeholder="1234" Label="Enter Your Email Address" /> *@
                         <ValidationMessage For="@(() => log.Email)" />
                     </div>
 
                     <div class="mb-3">
-                        <InputText id="Password" type="password" class="form-control" @bind-Value="log.Password" Placeholder="Password" />
-                        <label for="Password" class="form-label">Password</label>
+                        <InputText id="Password" type="password" class="form-control" @bind-Value="log.Password" Placeholder="Password" Label="Password"></InputText>
+                        @*  <FloatingText id="Password" type="password" class="form-control" @bind-Value="log.Password" Placeholder="Password" Label="Password" /> *@
                         <ValidationMessage For="@(() => log.Password)" />
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
@@ -65,7 +65,7 @@
         </div>
     </div>
 </section>
- *@
+
 @code {
     private LogInModel log = new LogInModel();
     private User user = new User();
@@ -173,6 +173,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        //await session.InitializeAsync();
+        await session.InitializeAsync();
     }
 }
