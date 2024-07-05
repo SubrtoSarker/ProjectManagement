@@ -1,4 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using Services.Session
+@inject Blazored.SessionStorage.ISessionStorageService sess
+@inject NavigationManager nav
+@inject IJSRuntime JSRuntime
+@inherits LayoutComponentBase
 
 <BootstrapBlazorRoot>
     <Layout SideWidth="0" IsPage="true" ShowGotoTop="true" ShowCollapseBar="true"
@@ -10,12 +14,12 @@
             <div class="flex-fill d-sm-none">
             </div>
             <Widget></Widget>
-            <Logout ImageUrl="images/Argo-C.png" DisplayName="Super Administrator" UserName="Admin">
+            <Logout ImageUrl="images/Argo-C.png" DisplayName="@DisplayName" UserName="@DisplayAccount">
                 <LinkTemplate>
                     <a href="#"><i class="fa-solid fa-suitcase"></i>Personal Center</a>
                     <a href="#"><i class="fa-solid fa-cog"></i>Set Up</a>
                     <a href="#"><i class="fa-solid fa-bell"></i>Notify<span class="badge badge-pill badge-success"></span></a>
-                    <LogoutLink />
+                    <a onclick="@Logout"><i class="fa-solid fa-key"></i>Logout</a>
                 </LinkTemplate>
             </Logout>
             <div class="layout-drawer" @onclick="@(e => IsOpen = !IsOpen)"><i class="fa fa-gears"></i></div>
@@ -131,3 +135,47 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    public SessionServices session = new SessionServices();
+    public string DisplayName = "";
+    public string DisplayAccount = "";
+
+    public string Team = "";
+    protected override async Task OnInitializedAsync()
+    {
+        var savedSession = await sess.GetItemAsync<SessionServices>("session");
+        if (savedSession is null)
+        {
+            nav.NavigateTo("/login");
+        }
+        else
+        {
+            string Name = savedSession.Name;
+            string Team = savedSession.TeamName;
+            DisplayName = Name + " ( " + Team + " )";
+            bool boss = savedSession.Boss;
+            bool Admin = savedSession.Admin;
+            if (Admin)
+            {
+                DisplayAccount = "Admin";
+            }
+            else if (boss)
+            {
+                DisplayAccount = "Superviser";
+            }
+            else
+            {
+                DisplayAccount = "User";
+            }
+        }
+    }
+    private void Logout()
+    {
+        nav.NavigateTo("/");
+        sess.ClearAsync();
+        session = new SessionServices();
+        JSRuntime.InvokeVoidAsync("localStorage.clear");
+    }
+}
+

@@ -102,7 +102,7 @@
                 session.TeamName = user.TeamName;
                 session.Boss = user.ISBoss;
                 session.Admin = user.ISAdmin;
-                await sess.SetItemAsync("sessio", session);
+                await sess.SetItemAsync("session", session);
                 if (rememberMe)
                 {
                     string Email = enc.EncryptString(log.Email);
@@ -181,6 +181,6 @@
         session.TeamName = string.Empty;
         session.Boss = false;
         session.Admin = false;
-        await sess.SetItemAsync("sessio", session);
+        await sess.SetItemAsync("session", session);
     }
 }
