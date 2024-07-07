@@ -1,0 +1,141 @@
+﻿@page "/Project"
+@attribute [TabItemOption(Text = "Project")]
+@using Models.User;
+@using ProjectManagement.Models.ProjectModel
+@using ProjectManagement.Services.Project
+@using Services;
+@using Services.Encription;
+@using Services.Auth;
+@using Services.Session
+@using Microsoft.JSInterop;
+@using System.Text.Json;
+@using NetcodeHub.Packages.Components.Validations.OnInput;
+@inject IAuthServices AuthServices;
+@inject IEncription enc;
+@inject IJSRuntime JSRuntime
+@inject NavigationManager nav
+@inject Blazored.SessionStorage.ISessionStorageService sess
+@inject IProjectService project
+
+<PageTitle>Project</PageTitle>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Create New Project</h4>
+                    <hr />
+                    <form @onsubmit="CreateProject" class="needs-validation" novalidate>
+                        <EditForm Model="@newProject" OnValidSubmit="CreateProject">
+                            <DataAnnotationsValidator />
+                            <div class="mb-3">
+                                <FloatingText id="ProjectName" type="text" class="form-control" @bind-Value="newProject.Name" Placeholder="Project Name" Label="Project Name" />
+                                <ValidationMessage class="text-danger" For="@(() => newProject.Name)" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg"
+                                    style="padding-left: 2.5rem; padding-right: 2.5rem;">
+                                Create Project
+                            </button>
+                        </EditForm>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h4>Projects List</h4>
+            @if (proj == null)
+            {
+                <p>Loading...</p>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Project Name</th>
+                            <th>Running Days</th>
+                            <th>Complete</th>
+                            <th>Users</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var project in proj)
+                        {
+                            <tr>
+                                <td>@project.StrProjectName</td>
+                                <td>@project.DaysPassed</td>
+                                <td><InputCheckbox disabled="True" @bind-Value="project.IsCompleate" /></td>
+                                <td>@project.UserCount</td>
+                                <td>
+                                    @if (!project.IsCompleate)
+                                    {
+                                        <button class="btn btn-primary rounded" @onclick="() => UpdateProject(project.IntProjectID)">Complete</button>
+                                    }
+                                    <button class="btn btn-danger rounded" @onclick="() => DeleteProject(project.IntProjectID)">Remove</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private ProjectCreate newProject = new ProjectCreate();
+    private List<Projects> proj = new List<Projects>();
+    public SessionServices session = new SessionServices();
+    private async Task CreateProject()
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to create a new project?");
+
+        if (confirmed)
+        {
+            string output = await project.Create(newProject.Name.ToString(), session.UserID);
+            //await JSRuntime.InvokeVoidAsync("showToast", output);
+            proj = await project.GetProjectByTeam(session.TeamID, session.UserID);
+            newProject = null;
+            StateHasChanged();
+        }
+    }
+    private async Task UpdateProject(int Project)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to complete this project?");
+        if (confirmed)
+        {
+            string output = await project.UdateStatus(1, Project, session.UserID);
+            //await JSRuntime.InvokeAsync<bool>("alert", output);
+            proj = await project.GetProjectByTeam(session.TeamID, session.UserID);
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteProject(int Project)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "This Project will be removed, are you still want to proceed");
+        if (confirmed)
+        {
+            string output = await project.UdateStatus(0, Project, session.UserID);
+            //await JSRuntime.InvokeAsync<bool>("alert", output);
+            proj = await project.GetProjectByTeam(session.TeamID, session.UserID);
+            StateHasChanged();
+        }
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            proj = await project.GetProjectByTeam(session.TeamID, session.UserID);
+            StateHasChanged();
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        session=await sess.GetItemAsync<SessionServices>("session");
+    }
+}
