@@ -102,6 +102,7 @@
                 session.TeamName = user.TeamName;
                 session.Boss = user.ISBoss;
                 session.Admin = user.ISAdmin;
+                session.Key = user.Token;
                 await sess.SetItemAsync("session", session);
                 if (rememberMe)
                 {

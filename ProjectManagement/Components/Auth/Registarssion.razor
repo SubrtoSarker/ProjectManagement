@@ -1,0 +1,141 @@
+﻿@page "/Register"
+@attribute [TabItemOption(Text = "Register")]
+@layout LogInLayout
+@using Models.User;
+@using Services;
+@using Services.Encription;
+@using Services.Auth;
+@using Services.Session
+@using Microsoft.JSInterop;
+@using System.Text.Json;
+@using NetcodeHub.Packages.Components.Validations.OnInput;
+@inject IAuthServices AuthServices;
+@inject IEncription enc;
+@inject IJSRuntime JSRuntime
+@inject NavigationManager nav
+@inject Blazored.SessionStorage.ISessionStorageService sess
+
+<PageTitle>Register</PageTitle>
+
+
+<section class="vh-100" >
+    <div class="container h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-lg-12 col-xl-11">
+                <div class="card text-black" style="border-radius: 25px;">
+                    <div class="card-body p-md-5">
+                        <div class="row justify-content-center">
+                            <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
+
+                                <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
+
+                                <EditForm Model="@userRegistration" OnValidSubmit="HandleValidSubmit">
+                                <DataAnnotationsValidator />
+                                @* <ValidationSummary /> *@
+
+                                <div class="mb-3">
+                                    <label for="Name" class="form-label">Your Name</label>
+                                    <Text id="Name" class="form-control" @bind-Value="userRegistration.Name" />
+                                    <ValidationMessage class="text-danger" For="@(() => userRegistration.Name)" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Phone" class="form-label">Your Phone</label>
+                                    <Text id="Phone" class="form-control" @bind-Value="userRegistration.Phone" />
+                                    <ValidationMessage class="text-danger" For="@(() => userRegistration.Phone)" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Email" class="form-label">Your Email</label>
+                                    <Text id="Email" Type="email" class="form-control" @bind-Value="userRegistration.Email" />
+                                    <ValidationMessage class="text-danger" For="@(() => userRegistration.Email)" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Password" class="form-label">Password</label>
+                                    <Text id="Password" type="password" class="form-control" @bind-Value="userRegistration.Password" />
+                                    <ValidationMessage class="text-danger" For="@(() => userRegistration.Password)" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="ConfirmPassword" class="form-label">Repeat your password</label>
+                                    <Text id="ConfirmPassword" type="password" class="form-control" @bind-Value="userRegistration.ConfirmPassword" />
+                                    <ValidationMessage class="text-danger" For="@(() => userRegistration.ConfirmPassword)" />
+                                </div>
+
+                                <div class="form-check mb-4">
+                                    <InputCheckbox id="AgreeToTerms" @bind-Value="userRegistration.AgreeToTerms" class="form-check-input" />
+                                    <label class="form-check-label" for="AgreeToTerms">
+                                        I agree to all statements in <a href="#!">Terms of service</a>
+                                    </label>
+                                    <ValidationMessage class="text-danger" For="@(() => userRegistration.AgreeToTerms)" />
+                                </div>
+                                    @if (!string.IsNullOrEmpty(errorMessage))
+                                    {
+                                        <div class="alert alert-danger text-center">@errorMessage</div>
+                                    }
+                                <div class="mb-3 text-center">
+                                    <button type="submit" class="btn btn-primary">Register</button>
+                                </div>
+                                </EditForm>
+
+                            </div>
+                            <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
+
+                                @* <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp" class="img-fluid" alt="Sample image"> *@
+                                <img src="Image/reg.png" class="img-fluid" alt="Sample image">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private User user = new User();
+    string errorMessage = "";
+    UserRegistration userRegistration = new UserRegistration();
+    SessionServices session = new SessionServices();
+    private async Task HandleValidSubmit()
+    {
+        user = await AuthServices.Register(userRegistration.Email, userRegistration.Name, userRegistration.Phone, userRegistration.Password,1,0);
+        if (user is null)
+        {
+            errorMessage = "Sorry there was an error !!!";
+        }
+        else if (user.Response == "GO" )
+        {
+            try
+            {
+                await sess.ClearAsync();
+                session.UserID = user.UserID;
+                session.Name = user.UserName;
+                session.Phone = user.Phone;
+                session.Email = user.Email;
+                session.TeamID = user.TeamID;
+                session.TeamName = user.TeamName;
+                session.Boss = user.ISBoss;
+                session.Admin = user.ISAdmin;
+                session.Key = user.Token;
+                await sess.SetItemAsync("session", session);
+                nav.NavigateTo("/Home");
+            }
+            catch (Exception ex)
+            {
+                errorMessage = "Sorry there was an error !!!";
+            }
+        }
+        else if (user.Response == "Expired")
+        {
+            nav.NavigateTo("/ResetPassword");
+        }
+        else
+        {
+            errorMessage = user.Response;
+        }
+        StateHasChanged();
+    }
+}

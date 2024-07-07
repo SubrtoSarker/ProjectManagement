@@ -18,5 +18,7 @@
         public bool Boss { get; set; }
 
         public bool Admin { get; set; }
+
+        public string Key { get; set; }
     }
 }
