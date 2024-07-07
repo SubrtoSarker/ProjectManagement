@@ -1,0 +1,15 @@
+﻿
+@page "/Test"
+@attribute [TabItemOption(Text = "Test")]
+
+@inject ToastService Tost
+
+<PageTitle>Test</PageTitle>
+<h3>TestPage</h3>
+<Button @onclick="@Success">Success</Button>
+@code {
+    public void Success()
+    {
+        Tost.Success("This is Titel", "This is Contest", true);
+    }
+}

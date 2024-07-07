@@ -1,4 +1,5 @@
 ﻿using Blazored.SessionStorage;
+using BootstrapBlazor.Components;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.SignalR;
 using ProjectManagement.Components;
@@ -20,7 +21,7 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 // Add Bootstrap Blazor
 builder.Services.AddBootstrapBlazor();
-
+builder.Services.AddSingleton<ToastService>();
 // Register services
 builder.Services.AddSingleton<WeatherForecastService>();
 
