@@ -6,10 +6,27 @@
 
 <PageTitle>Test</PageTitle>
 <h3>TestPage</h3>
+<Button @onclick="@info">Info</Button>
 <Button @onclick="@Success">Success</Button>
+
+<Button @onclick="@warning">warning</Button>
+<Button @onclick="@Danger">Error</Button>
+
 @code {
+    public void info()
+    {
+        Tost.Information("This is Titel", "This is Contest", true);
+    }
     public void Success()
     {
         Tost.Success("This is Titel", "This is Contest", true);
+    }
+    public void warning()
+    {
+        Tost.Warning("This is Titel", "This is Contest", true);
+    }
+    public void Danger()
+    {
+        Tost.Error("This is Titel", "This is Contest", true);
     }
 }
