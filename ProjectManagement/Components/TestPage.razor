@@ -1,5 +1,6 @@
 ﻿
 @page "/Test"
+@using ProjectManagement.Models.ProjectModel
 @attribute [TabItemOption(Text = "Test")]
 
 @inject ToastService Tost
@@ -14,17 +15,29 @@
 <Button @onclick="@Danger">Error</Button>
 
 
-<Modal @ref="modal" Title="Modal title">
-    <BodyTemplate>
-        Modal body text goes here.
-    </BodyTemplate>
-    <FooterTemplate>
-        <Button class="btn-info" @onclick="OnHideModalClick">Close</Button>
-        <Button class="btn-info">Save changes</Button>
-    </FooterTemplate>
-</Modal>
+<button class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#AddTask">
+    Add New Task
+</button>
+<div class="modal fade fade-in-modal" id="AddTask" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Add New Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="taskName" class="form-label">Task Name</label>
+                    <input type="text" class="form-control" id="taskName" @bind="newProject.Name" placeholder="Enter task name">
+                </div>
 
-<Button class="btn-info" @onclick="OnShowModalClick">Show Modal</Button>
+                <button type="button" data-bs-dismiss="modal" class="btn btn-primary" @onclick="AddNewTask">ADD</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     public void info()
@@ -43,15 +56,9 @@
     {
         Tost.Error("This is Titel", "This is Contest", true);
     }
-    private Modal modal = default!;
-
-    private async Task OnShowModalClick()
+    private ProjectCreate newProject = new ProjectCreate();
+    private async void AddNewTask()
     {
-        //await modal.ShowAsync();
-    }
-
-    private async Task OnHideModalClick()
-    {
-        //await modal.HideAsync();
+        await Tost.Success("This is Titel", "This is Contest", true);
     }
 }
