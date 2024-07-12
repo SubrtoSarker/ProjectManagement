@@ -10,7 +10,21 @@
 <Button @onclick="@Success">Success</Button>
 
 <Button @onclick="@warning">warning</Button>
+
 <Button @onclick="@Danger">Error</Button>
+
+
+<Modal @ref="modal" Title="Modal title">
+    <BodyTemplate>
+        Modal body text goes here.
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button class="btn-info" @onclick="OnHideModalClick">Close</Button>
+        <Button class="btn-info">Save changes</Button>
+    </FooterTemplate>
+</Modal>
+
+<Button class="btn-info" @onclick="OnShowModalClick">Show Modal</Button>
 
 @code {
     public void info()
@@ -28,5 +42,16 @@
     public void Danger()
     {
         Tost.Error("This is Titel", "This is Contest", true);
+    }
+    private Modal modal = default!;
+
+    private async Task OnShowModalClick()
+    {
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
     }
 }
