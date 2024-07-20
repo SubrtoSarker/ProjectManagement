@@ -1,0 +1,62 @@
+﻿@page "/User"
+@attribute [TabItemOption(Text = "User")]
+@using Models.Admin;
+@using Services.Admin;
+@inject IAdminServices admin;
+<PageTitle>User</PageTitle>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+
+            @if (users == null || users.Count()==0)
+            {
+                <p>Loading...</p>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>User Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Team</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in users)
+                        {
+                            <tr>
+                                <td>@user.strUserName</td>
+                                <td>@user.strPhone</td>
+                                <td>@user.strEmail</td>
+                                <td>@user.strTeamName</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<AllUser> users = new List<AllUser>();
+    public async void LoadUSer()
+    {
+        users = await admin.GetAllUser();
+        StateHasChanged();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            LoadUSer();
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        LoadUSer();
+    }
+
+}

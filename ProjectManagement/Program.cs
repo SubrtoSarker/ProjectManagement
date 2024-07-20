@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using ProjectManagement.Components;
 using ProjectManagement.Data;
 using ProjectManagement.Services;
+using ProjectManagement.Services.Admin;
 using ProjectManagement.Services.Auth;
 using ProjectManagement.Services.Encription;
 using ProjectManagement.Services.Project;
@@ -38,6 +39,11 @@ builder.Services.AddHttpClient<IAuthServices, AuthServices>(client =>
 });
 
 builder.Services.AddHttpClient<IProjectService, ProjectService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5164/");
+});
+
+builder.Services.AddHttpClient<IAdminServices, AdminServices>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:5164/");
 });
