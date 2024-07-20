@@ -1,6 +1,7 @@
 ﻿@page "/User"
 @attribute [TabItemOption(Text = "User")]
 @using Models.Admin;
+@using ProjectManagement.Models.ProjectModel
 @using ProjectManagement.Services.Session
 @using Services.Admin;
 @using NetcodeHub.Packages.Components.Validations.OnInput;
@@ -13,7 +14,14 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-
+            <h4>
+                User List
+                <button class="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#AddTeam">
+                    <i class="bi bi-plus"></i>
+                </button>
+            </h4>
             @if (users == null || users.Count()==0)
             {
                 <p>Loading...</p>
@@ -95,8 +103,8 @@
                             <ValidationMessage class="text-danger" For="@(() => user.strEmail)" />
                         </div>
                         <div class="col-md-6">
-                            <FloatingText id="UserTeam" type="text" class="form-control" @bind-Value="user.strEmail" Label="Team" />
-                            <ValidationMessage class="text-danger" For="@(() => user.intTeamID)" />
+                            <label for="UTeam" class="form-label">Team</label>
+                            <input type="number" class="form-check ms-2" id="UTeam" @bind-value="user.intTeamID">
                         </div>
                     </div>
 
@@ -137,8 +145,30 @@
         </div>
     </div>
 </div>
+<div class="modal fade fade-in-modal" id="AddTeam" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Add New Team</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@newProject" OnValidSubmit="CreateTeam" class="needs-validation" novalidate>
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <FloatingText id="UserName" type="text" class="form-control" @bind-Value="newProject.Name" Label="Name" />
+                        <ValidationMessage class="text-danger" For="@(() => newProject.Name)" />
+                    </div>
+                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">ADD</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
 @code {
     public List<AllUser> users = new List<AllUser>();
+    private ProjectCreate newProject = new ProjectCreate();
+
     public List<Team> Team = new List<Team>();
     public AllUser user = new AllUser();
     public bool isActive;
@@ -165,7 +195,7 @@
     private async Task Update()
     {
 
-        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Do you want to update this user???");
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Do you want to update this user?");
         if (confirmed)
         {
             int ID = user.intUserID;
@@ -204,5 +234,23 @@
             IsPreBoss = false;
         }
         LoadUSer(0);
+    }
+    private async Task CreateTeam()
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to create a new Team?");
+
+        if (confirmed)
+        {
+            string output = await admin.Create(newProject.Name.ToString(), session.UserID);
+            if (output.Contains("Success"))
+            {
+                await Tost.Success("Success", output, true);
+            }
+            else
+            {
+                await Tost.Error("Error", output, true);
+            }
+            LoadUSer(0);
+        }
     }
 }

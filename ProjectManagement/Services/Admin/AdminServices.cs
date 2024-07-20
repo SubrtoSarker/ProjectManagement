@@ -52,5 +52,19 @@ namespace ProjectManagement.Services.Admin
                 return null;
             }
         }
+        public async Task<string> Create(string Name, int Enroll)
+        {
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<string>($"api/Admin/Create?Name={Name}&Enroll={Enroll}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
     }
 }
