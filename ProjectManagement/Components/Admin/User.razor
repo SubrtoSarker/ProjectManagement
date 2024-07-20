@@ -1,9 +1,15 @@
 ﻿@page "/User"
 @attribute [TabItemOption(Text = "User")]
 @using Models.Admin;
+@using ProjectManagement.Services.Session
 @using Services.Admin;
+@using NetcodeHub.Packages.Components.Validations.OnInput;
 @inject IAdminServices admin;
+@inject IJSRuntime JSRuntime
+@inject ToastService Tost
+@inject Blazored.SessionStorage.ISessionStorageService sess
 <PageTitle>User</PageTitle>
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
@@ -17,20 +23,43 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            <th>User ID</th>
                             <th>User Name</th>
                             <th>Phone</th>
                             <th>Email</th>
                             <th>Team</th>
+                            <th>Superviser</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var user in users)
                         {
                             <tr>
+                                <td>@user.intUserID</td>
                                 <td>@user.strUserName</td>
                                 <td>@user.strPhone</td>
                                 <td>@user.strEmail</td>
                                 <td>@user.strTeamName</td>
+                                <td>
+                                    @if (@user.intUserID==@user.intBoss)
+                                    {
+                                        <i class="fa-solid fa-check"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-x"></i>
+                                    }
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary"
+                                            @onclick="() => GetUser(user.intUserID)"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#AddTask">
+                                            Edit
+                                    </button>
+                                </td>
+                                
                             </tr>
                         }
                     </tbody>
@@ -39,24 +68,143 @@
         </div>
     </div>
 </div>
+<div class="modal fade fade-in-modal" id="AddTask" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Update User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@user" OnValidSubmit="Update" class="needs-validation" novalidate>
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <FloatingText id="UserName" type="text" class="form-control" @bind-Value="user.strUserName" Label="Name" />
+                            <ValidationMessage class="text-danger" For="@(() => user.strUserName)" />
+                        </div>
+                        <div class="col-md-6">
+                            <FloatingText id="UserPhone" type="text" class="form-control" @bind-Value="user.strPhone" Label="Phone" />
+                            <ValidationMessage class="text-danger" For="@(() => user.strPhone)" />
+                        </div>
+                    </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <FloatingText id="UserEmail" type="email" class="form-control" @bind-Value="user.strEmail" Label="Email" />
+                            <ValidationMessage class="text-danger" For="@(() => user.strEmail)" />
+                        </div>
+                        <div class="col-md-6">
+                            <FloatingText id="UserTeam" type="text" class="form-control" @bind-Value="user.strEmail" Label="Team" />
+                            <ValidationMessage class="text-danger" For="@(() => user.intTeamID)" />
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        @if (isActive)
+                        {
+                            <div class="col-md-6">
+                                <label for="UActive" class="form-label">Active</label>
+                                <input type="checkbox" class="form-check ms-2" id="UActive" @bind-value="isActive" checked="checked">
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-md-6">
+                                <label for="UActive" class="form-label">Active</label>
+                                <input type="checkbox" class="form-check ms-2" id="UActive" @bind-value="isActive">
+                            </div>
+                        }
+                        
+                        @if (IsPreBoss)
+                        {
+                            <div class="col-md-6">
+                                <label for="USup" class="form-label">Superviser</label>
+                                <input type="checkbox" checked="checked ms-2" disabled="disabled" class="form-check" id="USup" @bind-value="IsBoss">
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-md-6">
+                                <label for="USup" class="form-label">Superviser</label>
+                                <input type="checkbox" class="form-check ms-2" id="USup" @bind-value="IsBoss">
+                            </div>
+                        }
+                    </div>
+
+                </EditForm>
+
+                <button type="button" data-bs-dismiss="modal" class="btn btn-primary mt-2" @onclick="Update">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
 @code {
     public List<AllUser> users = new List<AllUser>();
-    public async void LoadUSer()
+    public List<Team> Team = new List<Team>();
+    public AllUser user = new AllUser();
+    public bool isActive;
+    public bool IsBoss;
+    public bool IsPreBoss;
+    public SessionServices session = new SessionServices();
+    public async void LoadUSer(int UserID)
     {
-        users = await admin.GetAllUser();
+        users = await admin.GetAllUser(UserID);
         StateHasChanged();
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            LoadUSer();
+            LoadUSer(0);
         }
     }
     protected override async Task OnInitializedAsync()
     {
-        LoadUSer();
+        session = await sess.GetItemAsync<SessionServices>("session");
+        LoadUSer(0);
     }
+    private async Task Update()
+    {
 
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Do you want to update this user???");
+        if (confirmed)
+        {
+            int ID = user.intUserID;
+            string Name = user.strUserName;
+            string Phone = user.strPhone;
+            string Email = user.strEmail;
+            int TeamID = user.intTeamID;
+            bool active = isActive;
+            bool boss = IsBoss;
+            string output = await admin.UpdateUser(ID, Name, Phone, Email, TeamID, active, boss, session.UserID);
+            if (output.Contains("Success"))
+            {
+                await Tost.Success("Success", output, true);
+            }
+            else
+            {
+                await Tost.Error("Error", output, true);
+            }
+            LoadUSer(0);
+        }
+    }
+    private async void GetUser(int UserID)
+    {
+        users = await admin.GetAllUser(UserID);
+        user = users.FirstOrDefault();
+        Team = await admin.GetAllTeam();
+        isActive = true;
+        if (user.intUserID==user.intBoss)
+        {
+            IsBoss = true;
+            IsPreBoss = true;
+        }
+        else
+        {
+            IsBoss = false;
+            IsPreBoss = false;
+        }
+        LoadUSer(0);
+    }
 }
