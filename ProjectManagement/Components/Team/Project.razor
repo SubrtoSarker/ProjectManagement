@@ -16,37 +16,17 @@
 @inject NavigationManager nav
 @inject Blazored.SessionStorage.ISessionStorageService sess
 @inject IProjectService project
+@inject ToastService Tost
 
 <PageTitle>Project</PageTitle>
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Create New Project</h4>
-                    <hr />
-                    <form @onsubmit="CreateProject" class="needs-validation" novalidate>
-                        <EditForm Model="@newProject" OnValidSubmit="CreateProject">
-                            <DataAnnotationsValidator />
-                            <div class="mb-3">
-                                <FloatingText id="ProjectName" type="text" class="form-control" @bind-Value="newProject.Name" Placeholder="Project Name" Label="Project Name" />
-                                <ValidationMessage class="text-danger" For="@(() => newProject.Name)" />
-                            </div>
-
-                            <button type="submit" class="btn btn-primary btn-lg"
-                                    style="padding-left: 2.5rem; padding-right: 2.5rem;">
-                                Create Project
-                            </button>
-                        </EditForm>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-8">
+        <div class="col-md-12">
             <h4>
                 Projects List 
-                <button type="button" class="btn btn-primary btn-sm" style="margin-left: 10px;">
+                <button class="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#AddTask">
                     <i class="bi bi-plus"></i>
                 </button>
             </h4>
@@ -90,6 +70,24 @@
         </div>
     </div>
 </div>
+<div class="modal fade fade-in-modal" id="AddTask" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Add New Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="taskName" class="form-label">Task Name</label>
+                    <input type="text" class="form-control" id="taskName" @bind="newProject.Name" placeholder="Enter task name">
+                </div>
+
+                <button type="button" data-bs-dismiss="modal" class="btn btn-primary" @onclick="CreateProject">ADD</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 @code {
@@ -105,7 +103,15 @@
             string output = await project.Create(newProject.Name.ToString(), session.UserID);
             //await JSRuntime.InvokeVoidAsync("showToast", output);
             proj = await project.GetProjectByTeam(session.TeamID, session.UserID);
-            newProject = null;
+            //newProject = null;
+            if (output.Contains("Success"))
+            {
+                await Tost.Success("Success", output, true);
+            }
+            else
+            {
+                await Tost.Error("Error", output, true);
+            }
             StateHasChanged();
         }
     }
@@ -117,6 +123,14 @@
             string output = await project.UdateStatus(1, Project, session.UserID);
             //await JSRuntime.InvokeAsync<bool>("alert", output);
             proj = await project.GetProjectByTeam(session.TeamID, session.UserID);
+            if (output.Contains("Success"))
+            {
+                await Tost.Success("Success", output, true);
+            }
+            else
+            {
+                await Tost.Error("Error", output, true);
+            }
             StateHasChanged();
         }
     }
@@ -129,6 +143,14 @@
             string output = await project.UdateStatus(0, Project, session.UserID);
             //await JSRuntime.InvokeAsync<bool>("alert", output);
             proj = await project.GetProjectByTeam(session.TeamID, session.UserID);
+            if (output.Contains("Success"))
+            {
+                await Tost.Success("Success", output, true);
+            }
+            else
+            {
+                await Tost.Error("Error", output, true);
+            }
             StateHasChanged();
         }
     }

@@ -40,6 +40,7 @@ namespace ProjectManagement.Components.Shared
             {
                 new() { Text = "Home", Icon = "fa-solid fa-fw fa-home", Url = "/Home" , Match = NavLinkMatch.All},
                 new() { Text = "Project", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Project" },
+                new() { Text = "Test", Icon = "fa-solid fa-fw fa-check-square", Url = "/Test" },
                 new() { Text = "Counter", Icon = "fa-solid fa-fw fa-check-square", Url = "/counter" },
                 new() { Text = "Weather", Icon = "fa-solid fa-fw fa-database", Url = "/weather" },
                 new() { Text = "Table", Icon = "fa-solid fa-fw fa-table", Url = "/table" },
