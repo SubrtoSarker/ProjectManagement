@@ -15,6 +15,21 @@ namespace ProjectManagement.Services.Project
             _httpClient = httpClient;
         }
 
+        public async Task<string> AssigneUser(int User, int Project, bool Active, int Enroll)
+        {
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<string>($"api/Project/ProjectAssign?User={User}&Project={Project}&Active={Active}&Enroll={Enroll}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
+
         public async Task<string> Create(string Name, int Enroll)
         {
             try
@@ -44,6 +59,22 @@ namespace ProjectManagement.Services.Project
                 return null;
             }
         }
+
+        public async Task<List<UserPerProject>> GetUserPerProject(int TeamID, int ProjectID)
+        {
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<List<UserPerProject>>($"api/Project/UserPerProject?TeamID={TeamID}&ProjectID={ProjectID}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
+
         public async Task<string> UdateStatus(int Type, int Project, int Enroll)
         {
             try

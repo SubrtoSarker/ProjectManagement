@@ -53,13 +53,29 @@
                             <tr>
                                 <td>@project.StrProjectName</td>
                                 <td>@project.DaysPassed</td>
-                                <td><InputCheckbox disabled="True" @bind-Value="project.IsCompleate" /></td>
-                                <td>@project.UserCount</td>
                                 <td>
                                     @if (!project.IsCompleate)
                                     {
-                                        <button class="btn btn-primary rounded" @onclick="() => UpdateProject(project.IntProjectID)">Complete</button>
+                                        <button class="btn btn-primary btn-sm rounded" @onclick="() => UpdateProject(project.IntProjectID)">Complete</button>
                                     }
+                                    else
+                                    {
+                                        <InputCheckbox disabled="True" @bind-Value="project.IsCompleate" />
+                                    }
+                                </td>
+                                <td>
+                                    @project.UserCount
+                                    @if (!project.IsCompleate)
+                                    {
+                                        <button class="btn btn-success rounded ms-2"
+                                        @onclick="() => GetUser(project.IntProjectID)"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#Assign">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    }
+                                </td>
+                                <td>
                                     <button class="btn btn-danger rounded" @onclick="() => DeleteProject(project.IntProjectID)">Remove</button>
                                 </td>
                             </tr>
@@ -90,12 +106,52 @@
         </div>
     </div>
 </div>
+<div class="modal fade fade-in-modal" id="Assign" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Assign User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row ms-2">
+                    <div class="col-md-10">
+                        <label class="form-label ms-2">Name</label>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Status</label>
+                    </div>
+                </div>
+                @foreach (var item in UserPerProject)
+                {
+                    <div class="row ms-2 mt-2">
+                        <div class="col-md-10">
+                            <label class="form-control" for="@item.intUserID">@item.strUserName</label>
+                        </div>
+                        <div class="col-md-2">
+                            @if (item.isActive)
+                            {
+                                <input type="checkbox" class="form-check" id="@item.intUserID" @bind-value="item.isActive" checked="checked">
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="form-check" id="@item.intUserID" @bind-value="item.isActive">
+                            }
+                        </div>
+                    </div>
+                }
+                <button type="submit" data-bs-dismiss="modal" class="btn btn-primary mt-2" @onclick="Assign">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 @code {
     private ProjectCreate newProject = new ProjectCreate();
     private List<Projects> proj = new List<Projects>();
     public SessionServices session = new SessionServices();
+    public List<UserPerProject> UserPerProject = new List<UserPerProject>();
     private async Task CreateProject()
     {
         bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to create a new project?");
@@ -153,8 +209,35 @@
             {
                 await Tost.Error("Error", output, true);
             }
+            proj = await project.GetProjectByTeam(session.TeamID, session.UserID);
             StateHasChanged();
         }
+    }
+    private async void GetUser(int ProjectID)
+    {
+        UserPerProject = await project.GetUserPerProject(session.TeamID, ProjectID);
+        StateHasChanged();
+    }
+    private async void Assign()
+    {
+        foreach (var i in UserPerProject)
+        {
+            string output = await project.AssigneUser(i.intUserID, i.intProjectID, i.isActive, session.UserID);
+            if (output != "Unprocess.")
+            {
+                if (output.Contains("Success"))
+                {
+                    await Tost.Success("Success", output, true);
+                }
+                else
+                {
+                    await Tost.Error("Error", output, true);
+                }
+            } 
+            proj = await project.GetProjectByTeam(session.TeamID, session.UserID);
+            StateHasChanged();
+        }
+        
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
