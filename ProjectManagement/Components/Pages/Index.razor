@@ -1,10 +1,130 @@
 ﻿@page "/Home"
 @attribute [TabItemOption(Text = "Index", Closable = false)]
-
+@using ProjectManagement.Models.Task
+@using ProjectManagement.Services.Session
+@using ProjectManagement.Services.Task
+@using NetcodeHub.Packages.Components.Validations.OnInput;
+@inject Blazored.SessionStorage.ISessionStorageService sess
+@inject ITaskServices task
+@inject IJSRuntime JSRuntime
+@inject ToastService Tost
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        @if (ppu.Count==0 || ppu is null)
+        {
+            <div class="card">
+                <div class="card-header text-center bg-secondary text-black">
+                    <h5>No Projects Avlable</h5>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var item in ppu)
+                {
+                    <div class="col-md-3 mb-2">
+                        <div class="card-sm">
+                            <div class="card-header text-center bg-secondary text-black">
+                                <h5>
+                                    @item.strProjectName
+                                    <button class="btn btn-primary btn-sm"
+                                        @onclick="() => GetProjectID(item.intProjectID)"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#AddTask">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="fw-bold text-muted">Task Count : @item.TaskCount</p>
+                                <p class="fw-bold text-muted">Total Users : @item.UserCount</p>
+                                <p class="fw-bold text-muted">Assigned : @item.Lenght</p>
+                                <hr>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+<div class="modal fade fade-in-modal" id="AddTask" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Add New Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@newTask" OnValidSubmit="CreateTask" class="needs-validation" novalidate>
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <FloatingText id="Name" type="text" class="form-control" @bind-Value="newTask.strTaskName" Label="Name"/>
+                        <ValidationMessage class="text-danger" For="@(() => newTask.strTaskName)" />
+                    </div>
+                    <div class="row">
+                        <FloatingText id="Desc" type="text" class="form-control" @bind-Value="newTask.strDescription" Label="Description"/>
+                        <ValidationMessage class="text-danger" For="@(() => newTask.strDescription)" />
+                    </div>
+                    <div class="row">
+                        <FloatingText id="Req" type="text" class="form-control" @bind-Value="newTask.strRequestFrom" Label="Request From"/>
+                        <ValidationMessage class="text-danger" For="@(() => newTask.strRequestFrom)" />
+                    </div>
+                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">ADD</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code
+{
+    public SessionServices session = new SessionServices();
+    public List<ProjectPerUser> ppu = new List<ProjectPerUser>();
+    private TaskCreate newTask = new TaskCreate();
+    public int ProjectID;
+    public async void GetProjectID(int Project)
+    {
+        ProjectID = Project;
+        StateHasChanged();
+    }
+    public async void CreateTask()
+    {
+        string Name = newTask.strTaskName;
+        string Desc = newTask.strTaskName;
+        string ReqFrom = newTask.strRequestFrom;
+        string output = await task.CreateTask(Name, Desc, ReqFrom, session.UserID, ProjectID);
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+        load();
+        newTask = new TaskCreate();
+        StateHasChanged();
+    }
+    public async void load()
+    {
+        ppu = await task.GetProjectByUser(session.UserID);
+        StateHasChanged();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        session = await sess.GetItemAsync<SessionServices>("session");
+        load();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            load();
+        }
+    }
+}

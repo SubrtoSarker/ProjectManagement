@@ -10,6 +10,7 @@ using ProjectManagement.Services.Auth;
 using ProjectManagement.Services.Encription;
 using ProjectManagement.Services.Project;
 using ProjectManagement.Services.Session;
+using ProjectManagement.Services.Task;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,11 @@ builder.Services.AddHttpClient<IProjectService, ProjectService>(client =>
 });
 
 builder.Services.AddHttpClient<IAdminServices, AdminServices>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5164/");
+});
+
+builder.Services.AddHttpClient<ITaskServices, TaskServices>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:5164/");
 });
