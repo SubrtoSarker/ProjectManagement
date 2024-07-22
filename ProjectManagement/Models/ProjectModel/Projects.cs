@@ -11,8 +11,8 @@ namespace ProjectManagement.Models.ProjectModel
         public string StrProjectName { get; set; }
         [Display(Name = "Compleate")]
         public bool IsCompleate { get; set; }
-        [Display(Name = "Running Days")]
-        public int DaysPassed { get; set; }
+        [Display(Name = "Agging")]
+        public String DaysPassed { get; set; }
         [Display(Name = "Total User")]
         public int UserCount { get; set; }
     }

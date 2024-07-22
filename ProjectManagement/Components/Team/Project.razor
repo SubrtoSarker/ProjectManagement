@@ -41,7 +41,7 @@
                     <thead>
                         <tr>
                             <th>Project Name</th>
-                            <th>Running Days</th>
+                            <th>Agging</th>
                             <th>Complete</th>
                             <th>Users</th>
                             <th>Actions</th>
@@ -100,7 +100,7 @@
                         <FloatingText id="UserName" type="text" class="form-control" @bind-Value="newProject.Name" Label="Name" />
                         <ValidationMessage class="text-danger" For="@(() => newProject.Name)" />
                     </div>
-                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary" @onclick="CreateProject">ADD</button>
+                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">ADD</button>
                 </EditForm>
             </div>
         </div>

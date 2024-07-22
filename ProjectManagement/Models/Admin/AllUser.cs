@@ -21,5 +21,6 @@ namespace ProjectManagement.Models.Admin
         public int intTeamID { get; set; }
         public string strTeamName { get; set; }
         public int intBoss { get; set; }
+        public bool isLocked { get; set; }
     }
 }

@@ -11,6 +11,49 @@
 @inject ToastService Tost
 <PageTitle>Task</PageTitle>
 
+<style>
+    .task-button {
+        opacity: 0;
+        transform: translateY(0);
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.5s ease;
+    }
+
+       
+
+    .task-card:hover .task-button {
+        opacity: 1;
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+</style>
+<style>
+    .task-card {
+        max-height: 50px;
+        overflow: hidden;
+        transition: max-height 1s ease-out, padding 1s ease-out, margin 1s ease-out;
+    }
+
+    .task-card:hover {
+        max-height: none;
+        padding: 10px; /* Adjust the padding to your liking */
+        margin-bottom: 10px; /* Adjust the margin to your liking */
+    }
+
+    .kanban-column .card-body {
+        max-height: 200px;
+        overflow: hidden;
+        transition: max-height 1s ease-out, padding 1s ease-out, margin 1s ease-out;
+    }
+
+    .kanban-column:hover .card-body {
+        max-height: none;
+        padding: 10px; /* Adjust the padding to your liking */
+        margin-bottom: 10px; /* Adjust the margin to your liking */
+    }
+</style>
+
 <div class="row justify-content-center">
     <div class="col-md-8">
         @if (Current == null)
@@ -33,6 +76,7 @@
                     <hr>
                     <p class="fw-bold">Description:</p>
                     <p>@Current.strDescription</p>
+                    <p>@Current.strProjectName</p>
                     <hr>
                     <p class="fw-bold">Steps:</p>
                     @if (Steps != null && Steps.Any())
@@ -132,6 +176,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">@task.strTaskName</h5>
                                     <p class="card-text">@task.strDescription</p>
+                                    <p class="card-text">@task.strProjectName</p>
                                     <div class="text-muted mt-2">
                                         <small>
                                             @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")
@@ -170,6 +215,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">@task.strTaskName</h5>
                                     <p class="card-text">@task.strDescription</p>
+                                    <p class="card-text">@task.strProjectName</p>
                                     <div class="text-muted mt-2">
                                         <small>
                                             @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")
@@ -208,6 +254,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">@task.strTaskName</h5>
                                     <p class="card-text">@task.strDescription</p>
+                                    <p class="card-text">@task.strProjectName</p>
                                     <div class="text-muted mt-2">
                                         <small>
                                             @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")
@@ -246,6 +293,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">@task.strTaskName</h5>
                                     <p class="card-text">@task.strDescription</p>
+                                    <p class="card-text">@task.strProjectName</p>
                                     <div class="text-muted mt-2">
                                         <small>
                                             @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")

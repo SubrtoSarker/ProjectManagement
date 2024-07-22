@@ -37,6 +37,7 @@
                             <th>Email</th>
                             <th>Team</th>
                             <th>Superviser</th>
+                            <th>Locked</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -51,6 +52,16 @@
                                 <td>@user.strTeamName</td>
                                 <td>
                                     @if (@user.intUserID==@user.intBoss)
+                                    {
+                                        <i class="fa-solid fa-check"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-x"></i>
+                                    }
+                                </td>
+                                <td>
+                                    @if (@user.isLocked)
                                     {
                                         <i class="fa-solid fa-check"></i>
                                     }
@@ -111,29 +122,43 @@
                     <div class="row mt-4">
                         @if (isActive)
                         {
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="UActive" class="form-label">Active</label>
                                 <input type="checkbox" class="form-check ms-2" id="UActive" @bind-value="isActive" checked="checked">
                             </div>
                         }
                         else
                         {
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="UActive" class="form-label">Active</label>
                                 <input type="checkbox" class="form-check ms-2" id="UActive" @bind-value="isActive">
+                            </div>
+                        }
+                        @if (IsPreLocked)
+                        {
+                            <div class="col-md-4">
+                                <label for="UActive" class="form-label">Locked</label>
+                                <input type="checkbox" class="form-check ms-2" id="UActive" @bind-value="IsLocked" checked="checked">
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-md-4">
+                                <label for="UActive" class="form-label">Locked</label>
+                                <input type="checkbox" disabled="disabled" class="form-check ms-2" id="UActive" @bind-value="IsLocked">
                             </div>
                         }
                         
                         @if (IsPreBoss)
                         {
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="USup" class="form-label">Superviser</label>
                                 <input type="checkbox" checked="checked ms-2" disabled="disabled" class="form-check" id="USup" @bind-value="IsBoss">
                             </div>
                         }
                         else
                         {
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="USup" class="form-label">Superviser</label>
                                 <input type="checkbox" class="form-check ms-2" id="USup" @bind-value="IsBoss">
                             </div>
@@ -173,6 +198,8 @@
     public AllUser user = new AllUser();
     public bool isActive;
     public bool IsBoss;
+    public bool IsLocked;
+    public bool IsPreLocked;
     public bool IsPreBoss;
     public SessionServices session = new SessionServices();
     public async void LoadUSer(int UserID)
@@ -205,7 +232,7 @@
             int TeamID = user.intTeamID;
             bool active = isActive;
             bool boss = IsBoss;
-            string output = await admin.UpdateUser(ID, Name, Phone, Email, TeamID, active, boss, session.UserID);
+            string output = await admin.UpdateUser(ID, Name, Phone, Email, TeamID, active, boss, session.UserID, IsLocked);
             if (output.Contains("Success"))
             {
                 await Tost.Success("Success", output, true);
@@ -223,6 +250,8 @@
         user = users.FirstOrDefault();
         Team = await admin.GetAllTeam();
         isActive = true;
+        IsLocked = user.isLocked;
+        IsPreLocked = user.isLocked;
         if (user.intUserID==user.intBoss)
         {
             IsBoss = true;
