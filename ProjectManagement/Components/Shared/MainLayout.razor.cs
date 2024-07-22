@@ -8,7 +8,7 @@ namespace ProjectManagement.Components.Shared
     /// </summary>
     public sealed partial class MainLayout
     {
-        private bool UseTabSet { get; set; } = true;
+        private bool UseTabSet { get; set; } = false;
 
         private string Theme { get; set; } = "";
 
@@ -18,7 +18,7 @@ namespace ProjectManagement.Components.Shared
 
         private bool IsFixedFooter { get; set; } = true;
 
-        private bool IsFullSide { get; set; } = true;
+        private bool IsFullSide { get; set; } = false;
 
         private bool ShowFooter { get; set; } = true;
 
