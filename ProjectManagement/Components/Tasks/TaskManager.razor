@@ -1,0 +1,513 @@
+﻿@page "/Task"
+@attribute [TabItemOption(Text = "Task", Closable = false)]
+@using ProjectManagement.Models.ProjectModel
+@using ProjectManagement.Models.Task
+@using ProjectManagement.Services.Session
+@using ProjectManagement.Services.Task
+@using NetcodeHub.Packages.Components.Validations.OnInput;
+@inject Blazored.SessionStorage.ISessionStorageService sess
+@inject ITaskServices task
+@inject IJSRuntime JSRuntime
+@inject ToastService Tost
+<PageTitle>Task</PageTitle>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        @if (Current == null)
+        {
+            <div class="card">
+            <div class="card-header text-center bg-secondary text-black">
+                    <h5>No Current Task</h5>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="card">
+            <div class="card-header text-center bg-secondary text-black">
+                    <h5>In Progress</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="text-center">@Current.strTaskName</h2>
+                    <p class="fw-bold text-muted">Requested by: @Current.strRequestFrom</p>
+                    <hr>
+                    <p class="fw-bold">Description:</p>
+                    <p>@Current.strDescription</p>
+                    <hr>
+                    <p class="fw-bold">Steps:</p>
+                    @if (Steps != null && Steps.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var step in Steps)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <label class="form-check-label" for="@($"checkbox-{step.intStepId}")">@step.strStep</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="@($"checkbox-{step.intStepId}")" checked="@step.isDone"  @onchange="() => UpdateStepSatatus(step.intStepId, step.isDone)" />
+                                        <label class="form-check-label" for="@($"checkbox-{step.intStepId}")">Done</label>
+                                    </div>
+                                    <button class="btn btn-primary"
+                                            @onclick="() => SetStep(step.strStep,step.intStepId)"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#EditStep">
+                                        <i class="bi bi-pen"></i>
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    }
+
+                    @if (!showTextbox)
+                    {
+                        <div class="mt-3">
+                            <button class="btn btn-primary" @onclick="ToggleTextbox">Add Step</button>
+                        </div>
+                    }
+                    @if (showTextbox)
+                    {
+                        <div class="mt-3">
+                            <EditForm Model="@newProject" OnValidSubmit="CreateStep" class="needs-validation" novalidate>
+                                <DataAnnotationsValidator />
+                                <div class="row">
+                                    <FloatingText id="UserName" type="text" class="form-control" @bind-Value="newProject.Name" Label="Step" />
+                                    <ValidationMessage class="text-danger" For="@(() => newProject.Name)" />
+                                </div>
+                            <button type="submit" class="btn btn-primary">ADD</button>
+                            <button class="btn btn-warning" @onclick="CancelStep">Cancel</button>
+                            </EditForm>
+                        </div>
+                    }
+                    <hr>
+
+                    <div class="mt-3">
+                        <button class="btn" style="@ButtonStyle" @onclick="TogglePause">@(isPaused ? "Resume" : "Pause")</button>
+
+                        <button class="btn btn-success"
+                                data-bs-toggle="modal"
+                                data-bs-target="#actionModal"
+                                data-bs-title=@Current.strTaskName
+                                onclick="updateModalTitle(this.getAttribute('data-bs-title'))">
+                            Action
+                        </button>
+                        @* @if (session.TeamID>1)
+                        {
+                            <button class="btn btn-primary ms-1"
+                                data-bs-toggle="modal"
+                                data-bs-target="#TranferModal"
+                                data-bs-title=@Current.strTaskName
+                                onclick="updateModalTitleTransfer(this.getAttribute('data-bs-title'))">
+                                Transfer
+                            </button>
+                        } *@
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <div>
+                        <p class="fw-bold">Previous Session: @PreviouSession.ToString(@"hh\:mm\:ss")</p>
+                    </div>
+                    <div>
+                        <p class="fw-bold">Current Working Time: @elapsedTime.ToString(@"hh\:mm\:ss")</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+<br />
+<br />
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card kanban-column">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>TO DO <span>@(ToDo != null ? $"({ToDo.Count()})" : "(0)")</span></h3>
+                </div>
+                <div class="card-body">
+                    @if (ToDo != null && ToDo.Any())
+                    {
+                        @foreach (var task in ToDo)
+                        {
+                            <div class="card task-card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">@task.strTaskName</h5>
+                                    <p class="card-text">@task.strDescription</p>
+                                    <div class="text-muted mt-2">
+                                        <small>
+                                            @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")
+                                        </small>
+                                    </div>
+                                    <div class="task-buttons">
+                                        <button type="button" @onclick="() => Start(task.intTaskID)" class="btn btn-secondary task-button" title="Start">
+                                            Start
+                                        </button>
+                                        <button type="button" @onclick="() => Change(task.intTaskID,3)" class="btn btn-warning task-button" title="On Hold">
+                                            On Hold
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>No tasks in this category.</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card kanban-column">
+                <div class="card-header bg-warning text-white text-center">
+                    <h3>On Hold <span>@(OnHold != null ? $"({OnHold.Count()})" : "(0)")</span></h3>
+                </div>
+                <div class="card-body">
+                    @if (OnHold != null && OnHold.Any())
+                    {
+                        @foreach (var task in OnHold)
+                        {
+                            <div class="card task-card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">@task.strTaskName</h5>
+                                    <p class="card-text">@task.strDescription</p>
+                                    <div class="text-muted mt-2">
+                                        <small>
+                                            @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")
+                                        </small>
+                                    </div>
+                                    <div class="task-buttons">
+                                        <button type="button" @onclick="() => Start(task.intTaskID)" class="btn btn-secondary task-button" title="Start">
+                                            Start
+                                        </button>
+                                        <button type="button" @onclick="() => Change(task.intTaskID,2)" class="btn btn-primary task-button" title="Start">
+                                            TO DO
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>No tasks in this category.</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card kanban-column">
+                <div class="card-header bg-info text-white text-center">
+                    <h3>In Review <span>@(InReview != null ? $"({InReview.Count()})" : "(0)")</span></h3>
+                </div>
+                <div class="card-body">
+                    @if (InReview != null && InReview.Any())
+                    {
+                        @foreach (var task in InReview)
+                        {
+                            <div class="card task-card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">@task.strTaskName</h5>
+                                    <p class="card-text">@task.strDescription</p>
+                                    <div class="text-muted mt-2">
+                                        <small>
+                                            @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")
+                                        </small>
+                                    </div>
+                                    <div class="task-buttons">
+                                        <button type="button" @onclick="() => Start(task.intTaskID)" class="btn btn-secondary task-button" title="Start">
+                                            Start
+                                        </button>
+                                        <button type="button" @onclick="() => Change(task.intTaskID, 5)" class="btn btn-success task-button" title="On Hold">
+                                            Complete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>No tasks in this category.</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card kanban-column">
+                <div class="card-header bg-success text-white text-center">
+                    <h3>Compete <span>@(Compete != null ? $"({Compete.Count()})" : "(0)")</span></h3>
+                </div>
+                <div class="card-body">
+                    @if (Compete != null && Compete.Any())
+                    {
+                        @foreach (var task in Compete)
+                        {
+                            <div class="card task-card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">@task.strTaskName</h5>
+                                    <p class="card-text">@task.strDescription</p>
+                                    <div class="text-muted mt-2">
+                                        <small>
+                                            @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")
+                                        </small>
+                                    </div>
+                                    @* <div class="task-buttons">
+                            <button type="button" class="btn btn-secondary task-button" title="Start">
+                            Start
+                            </button>
+                            <button type="button" class="btn btn-warning task-button" title="On Hold">
+                            On Hold
+                            </button>
+                            </div> *@
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>No tasks in this category.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade fade-in-modal" id="EditStep" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Edit Step</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@newProject" OnValidSubmit="EditStep" class="needs-validation" novalidate>
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <FloatingText id="UserName" type="text" class="form-control" @bind-Value="newProject.Name" Label="Name" />
+                        <ValidationMessage class="text-danger" For="@(() => newProject.Name)" />
+                    </div>
+                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Update</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade fade-in-modal" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="actionModalLabel">Task Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="btn-group d-flex" role="group">
+                    <button class="btn btn-primary flex-fill" data-bs-dismiss="modal" @onclick="() => TaskAction(0 , Current.intTaskID, 0, 2, elapsedTime)">
+                        <i class="bi bi-list-task me-2"></i> TO DO
+                    </button>
+                    <button class="btn btn-warning flex-fill" data-bs-dismiss="modal" @onclick="() => TaskAction(0 , Current.intTaskID, 0, 3, elapsedTime)">
+                        <i class="bi bi-pause me-2"></i> On Hold
+                    </button>
+                </div>
+                <div class="btn-group d-flex mt-2" role="group">
+                    <button class="btn btn-info flex-fill" data-bs-dismiss="modal" @onclick="() => TaskAction(0 , Current.intTaskID, 0, 4, elapsedTime)">
+                        <i class="bi bi-eye me-2"></i> Review
+                    </button>
+                    <button class="btn btn-success flex-fill" data-bs-dismiss="modal" @onclick="() => TaskAction(0 , Current.intTaskID, 0, 5, elapsedTime)">
+                        <i class="bi bi-check2 me-2"></i> Complete
+                    </button>
+                    <button class="btn btn-danger flex-fill" data-bs-dismiss="modal" @onclick="() => TaskAction(0 , Current.intTaskID, 0, 6, elapsedTime)">
+                        <i class="bi bi-x-circle me-2"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@code
+{
+    public SessionServices session = new SessionServices();
+    public Tasks Current;
+    public List<Tasks> ToDo;
+    public List<Tasks> OnHold;
+    public List<Tasks> InReview;
+    public List<Tasks> Compete;
+    private string ButtonStyle => isPaused ? "background-color: green; color: white;" : "background-color: yellow; color: black;";
+    TimeSpan PreviouSession;
+    private TimeSpan elapsedTime;
+    private DateTime startTime;
+    private bool isPaused = true;
+    private System.Timers.Timer? timer;
+    private List<Steps> Steps;
+    bool showTextbox = false;
+    private ProjectCreate newProject = new ProjectCreate();
+    public int stepId;
+    public async Task Start(int TaskID)
+    {
+        if (Current != null)
+        {
+            await Tost.Warning("Warning", "Please finish the current task at hand!!!", true);
+        }
+        else
+        {
+            TimeSpan t1 = TimeSpan.Parse("00:00");
+            TaskAction(0, TaskID, 0, 1, t1);
+            StopAndResetTimer();
+            StartTimer();
+        }
+    }
+    public async Task Change(int TaskID, int StatusID)
+    {
+        TimeSpan t1 = TimeSpan.Parse("00:00");
+        TaskAction(0, TaskID, 0, StatusID, t1);
+    }
+    public async Task TaskAction(int Type, int TaskID, int User, int Status, TimeSpan time)
+    {
+        string output = await task.TaskManage(Type, TaskID, User, Status, time, session.UserID);
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+        load();
+    }
+    public void ToggleTextbox()
+    {
+        showTextbox = !showTextbox;
+        newProject = new ProjectCreate();
+    }
+    private async void SetStep(string Step, int StepID)
+    {
+        newProject.Name = Step;
+        stepId = StepID;
+        StateHasChanged();
+    }
+    public async Task EditStep()
+    {
+        string output = await task.StepManage(1, newProject.Name, false, stepId, session.UserID);
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+        showTextbox = false;
+        newProject = new ProjectCreate();
+        Steps = await task.GetStepsByTask(Current.intTaskID);
+        StateHasChanged();
+    }
+    public async Task CreateStep()
+    {
+        string output = await task.StepManage(2, newProject.Name, false, Current.intTaskID, session.UserID);
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+        showTextbox = false;
+        newProject = new ProjectCreate();
+        Steps = await task.GetStepsByTask(Current.intTaskID);
+        StateHasChanged();
+    }
+    public void CancelStep()
+    {
+        showTextbox = false;
+        newProject = new ProjectCreate();
+    }
+    public async Task UpdateStepSatatus(int stepID, bool status)
+    {
+        string output = await task.StepManage(0, "a", !status, stepID, session.UserID);
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+        Steps = await task.GetStepsByTask(Current.intTaskID);
+        StateHasChanged();
+    }
+    public async void load()
+    {
+        Current = await task.GetCurrentTasks(session.UserID);
+        ToDo = await task.GetTasks(session.UserID, 2);
+        OnHold = await task.GetTasks(session.UserID, 3);
+        InReview = await task.GetTasks(session.UserID, 4);
+        Compete = await task.GetTasks(session.UserID, 5);
+        if (Current!=null)
+        {
+            PreviouSession = Current.tmWorking;
+            isPaused = false;
+            Steps = await task.GetStepsByTask(Current.intTaskID);
+        }
+        StateHasChanged();
+    }
+    protected void StartTimer()
+    {
+        startTime = DateTime.Now;
+
+        // Update the elapsed time every second
+        timer = new System.Timers.Timer(1000);
+        timer.Elapsed += (sender, e) => { InvokeAsync(UpdateElapsedTime); };
+        timer.Start();
+    }
+
+    private void TogglePause()
+    {
+        isPaused = !isPaused;
+
+        if (isPaused)
+        {
+            // Pause the timer
+            timer.Stop();
+        }
+        else
+        {
+            // Resume the timer
+            startTime = DateTime.Now - elapsedTime; // Adjust start time to maintain elapsed time
+            timer.Start();
+        }
+
+        StateHasChanged(); // Notify Blazor to update the UI
+    }
+    private void UpdateElapsedTime()
+    {
+        if (!isPaused)
+        {
+            var now = DateTime.Now;
+            elapsedTime = now - startTime;
+            StateHasChanged(); // Notify Blazor to update the UI
+        }
+    }
+    private void StopAndResetTimer()
+    {
+        if (timer != null)
+        {
+            timer.Stop();
+        }
+        elapsedTime = TimeSpan.Zero;
+        startTime = DateTime.Now;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        session = await sess.GetItemAsync<SessionServices>("session");
+        load();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            load();
+            StartTimer();
+        }
+    }
+}

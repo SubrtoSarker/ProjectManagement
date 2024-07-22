@@ -29,7 +29,7 @@
                     <div class="col-md-3 mb-2">
                         <div class="card-sm">
                             <div class="card-header text-center bg-secondary text-black">
-                                <h5>
+                                <h5 class="mt-2 ms-2">
                                     @item.strProjectName
                                     <button class="btn btn-primary btn-sm"
                                         @onclick="() => GetProjectID(item.intProjectID)"
@@ -95,7 +95,7 @@
     public async void CreateTask()
     {
         string Name = newTask.strTaskName;
-        string Desc = newTask.strTaskName;
+        string Desc = newTask.strDescription;
         string ReqFrom = newTask.strRequestFrom;
         string output = await task.CreateTask(Name, Desc, ReqFrom, session.UserID, ProjectID);
         if (output.Contains("Success"))
