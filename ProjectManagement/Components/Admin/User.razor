@@ -115,7 +115,12 @@
                         </div>
                         <div class="col-md-6">
                             <label for="UTeam" class="form-label">Team</label>
-                            <input type="number" class="form-check ms-2" id="UTeam" @bind-value="user.intTeamID">
+                            <InputSelect id="department" @bind-Value="user.intTeamID" class="form-control">
+                                @foreach (var i in Team)
+                                {
+                                    <option value="@i.intTeamID">@i.strTeamName</option>
+                                }
+                            </InputSelect>
                         </div>
                     </div>
 
