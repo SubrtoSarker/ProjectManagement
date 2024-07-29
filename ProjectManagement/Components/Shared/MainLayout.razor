@@ -168,6 +168,11 @@
             {
                 DisplayAccount = "User";
             }
+            if (savedSession.UserID==2)
+            {
+                DisplayAccount = "All";
+            }
+            Menus = GetIconSideMenuItems(DisplayAccount);
         }
     }
     private void Logout()

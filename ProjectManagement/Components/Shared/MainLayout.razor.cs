@@ -51,5 +51,57 @@ namespace ProjectManagement.Components.Shared
 
             return menus;
         }
+        private static List<MenuItem> GetIconSideMenuItems(string displayAccount)
+        {
+            var menus = new List<MenuItem>
+            {
+                new() { Text = "Home", Icon = "fa-solid fa-fw fa-home", Url = "/Home", Match = NavLinkMatch.All },
+                new() { Text = "Tasks", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Task" },
+            };
+
+            if (displayAccount == "All")
+            {
+                menus.AddRange(new List<MenuItem>
+                {
+                    new() { Text = "Project", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Project" },
+                    new() { Text = "User", Icon = "fa-solid fa-fw fa-briefcase", Url = "/User" },
+                    new() { Text = "Test", Icon = "fa-solid fa-fw fa-check-square", Url = "/Test" },
+                    new() { Text = "Counter", Icon = "fa-solid fa-fw fa-check-square", Url = "/counter" },
+                    new() { Text = "Weather", Icon = "fa-solid fa-fw fa-database", Url = "/weather" },
+                    new() { Text = "Table", Icon = "fa-solid fa-fw fa-table", Url = "/table" },
+                    new() { Text = "Roster", Icon = "fa-solid fa-fw fa-users", Url = "/users" }
+                });
+            }
+            if (displayAccount == "Admin")
+            {
+                menus.AddRange(new List<MenuItem>
+                {
+                    new() { Text = "User", Icon = "fa-solid fa-fw fa-briefcase", Url = "/User" },
+                });
+            }
+            if (displayAccount == "Superviser")
+            {
+                menus.AddRange(new List<MenuItem>
+                {
+                    new() { Text = "Project", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Project" },
+                });
+            }
+            if (displayAccount == "User")
+            {
+                //menus.AddRange(new List<MenuItem>
+                //{
+                //    new() { Text = "Project", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Project" },
+                //    new() { Text = "User", Icon = "fa-solid fa-fw fa-briefcase", Url = "/User" },
+                //    new() { Text = "Test", Icon = "fa-solid fa-fw fa-check-square", Url = "/Test" },
+                //    new() { Text = "Counter", Icon = "fa-solid fa-fw fa-check-square", Url = "/counter" },
+                //    new() { Text = "Weather", Icon = "fa-solid fa-fw fa-database", Url = "/weather" },
+                //    new() { Text = "Table", Icon = "fa-solid fa-fw fa-table", Url = "/table" },
+                //    new() { Text = "Roster", Icon = "fa-solid fa-fw fa-users", Url = "/users" }
+                //});
+            }
+
+            return menus;
+        }
+
     }
 }
