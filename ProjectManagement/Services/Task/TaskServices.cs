@@ -1,6 +1,7 @@
 ﻿using ProjectManagement.Models.Admin;
 using ProjectManagement.Models.ProjectModel;
 using ProjectManagement.Models.Task;
+using System.Runtime.CompilerServices;
 
 namespace ProjectManagement.Services.Task
 {
@@ -75,6 +76,20 @@ namespace ProjectManagement.Services.Task
             try
             {
                 var result = await _httpClient.GetFromJsonAsync<List<Steps>>($"api/Task/GetStepsByTask?Task={Task}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
+        public async Task<List<TransferUser>> TransferCheck(int Task, int User)
+        {
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<List<TransferUser>>($"api/Task/TransferCheck?Task={Task}&User={User}");
                 return result;
             }
             catch (Exception ex)

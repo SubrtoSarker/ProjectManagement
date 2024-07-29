@@ -133,16 +133,16 @@
                                 onclick="updateModalTitle(this.getAttribute('data-bs-title'))">
                             Action
                         </button>
-                        @* @if (session.TeamID>1)
+                        @if (session.TeamID>1)
                         {
                             <button class="btn btn-primary ms-1"
                                 data-bs-toggle="modal"
                                 data-bs-target="#TranferModal"
                                 data-bs-title=@Current.strTaskName
-                                onclick="updateModalTitleTransfer(this.getAttribute('data-bs-title'))">
+                                @onclick="() => TransferCheck(Current.strTaskName,Current.intTaskID)">
                                 Transfer
                             </button>
-                        } *@
+                        }
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-between">
@@ -372,6 +372,38 @@
         </div>
     </div>
 </div>
+<div class="modal fade fade-in-modal" id="TranferModal" tabindex="-1" role="dialog" aria-labelledby="TranferModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="TranferModalLabel">@TaskName</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="btn-group d-flex" role="group">
+                    @if (TransferUser != null && TransferUser.Any())
+                    {
+                        <div class="col-md-12">
+                            <label class="form-label">Transfer To :</label>
+                            <InputSelect id="department" class="form-control" @bind-Value="Select">
+                                @foreach (var user in TransferUser)
+                                {
+                                    <option value="@user.intUserID">@user.strUserName</option>
+                                }
+                            </InputSelect>
+                            <button type="button" data-bs-dismiss="modal" class="btn btn-primary mt-2" @onclick="()=>Transfer(elapsedTime)">Transfer</button>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <p>No Team Member to transfer this task</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @code
 {
     public SessionServices session = new SessionServices();
@@ -380,6 +412,7 @@
     public List<Tasks> OnHold;
     public List<Tasks> InReview;
     public List<Tasks> Compete;
+    public List<TransferUser> TransferUser;
     private string ButtonStyle => isPaused ? "background-color: green; color: white;" : "background-color: yellow; color: black;";
     TimeSpan PreviouSession;
     private TimeSpan elapsedTime;
@@ -390,6 +423,8 @@
     bool showTextbox = false;
     private ProjectCreate newProject = new ProjectCreate();
     public int stepId;
+    public string TaskName;
+    public int Select ;
     public async Task Start(int TaskID)
     {
         if (Current != null)
@@ -399,15 +434,29 @@
         else
         {
             TimeSpan t1 = TimeSpan.Parse("00:00");
-            TaskAction(0, TaskID, 0, 1, t1);
+            await TaskAction(0, TaskID, 0, 1, t1);
             StopAndResetTimer();
             StartTimer();
         }
     }
+    public async Task TransferCheck(string Task, int TaskID)
+    {
+        TaskName = "Transfer "+Task;
+        TransferUser = await task.TransferCheck(TaskID, session.UserID);
+        if (TransferUser != null && TransferUser.Any())
+        {
+            Select = TransferUser.First().intUserID;
+        }
+    }
+    public async Task Transfer(TimeSpan time)
+    {
+        await TaskAction(1, Current.intTaskID, Select, 2, time);
+        StopAndResetTimer();
+    }
     public async Task Change(int TaskID, int StatusID)
     {
         TimeSpan t1 = TimeSpan.Parse("00:00");
-        TaskAction(0, TaskID, 0, StatusID, t1);
+        await TaskAction(0, TaskID, 0, StatusID, t1);
     }
     public async Task TaskAction(int Type, int TaskID, int User, int Status, TimeSpan time)
     {

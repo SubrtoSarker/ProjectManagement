@@ -9,6 +9,7 @@ namespace ProjectManagement.Services.Task
         Task<List<Tasks>> GetTasks(int Enroll, int Status);
         Task<Tasks> GetCurrentTasks(int Enroll);
         Task<List<Steps>> GetStepsByTask(int Task);
+        Task<List<TransferUser>> TransferCheck(int Task, int User);
         Task<string> StepManage(int Type, string Name, bool IsDone, int StepID, int Enroll);
         Task<string> TaskManage(int Type, int TaskID, int User, int Status, TimeSpan Working, int Enroll);
     }
