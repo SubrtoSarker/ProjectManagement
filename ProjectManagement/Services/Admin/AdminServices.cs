@@ -43,6 +43,7 @@ namespace ProjectManagement.Services.Admin
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<List<Team>>($"api/Admin/GetAllTeam");
                 return result;
             }
@@ -57,6 +58,7 @@ namespace ProjectManagement.Services.Admin
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<string>($"api/Admin/UpdateUser?User={User}&Name={Name}&Phone={Phone}&Email={Email}&Team={Team}&Active={Active}&isboss={isboss}&Enroll={Enroll}&Locked={Locked}");
                 return result;
             }
@@ -71,6 +73,7 @@ namespace ProjectManagement.Services.Admin
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<string>($"api/Admin/Create?Name={Name}&Enroll={Enroll}");
                 return result;
             }
