@@ -1,6 +1,9 @@
-﻿using ProjectManagement.Models.Admin;
+﻿using Blazored.SessionStorage;
+using ProjectManagement.Models.Admin;
 using ProjectManagement.Models.ProjectModel;
 using ProjectManagement.Models.Task;
+using ProjectManagement.Services.Session;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 
 namespace ProjectManagement.Services.TaskM
@@ -8,15 +11,25 @@ namespace ProjectManagement.Services.TaskM
     public class TaskServices : ITaskServices
     {
         private readonly HttpClient _httpClient;
-        public TaskServices(HttpClient httpClient)
+        private readonly ISessionStorageService _sessionStorageService;
+        public TaskServices(HttpClient httpClient, ISessionStorageService sessionStorageService)
         {
             _httpClient = httpClient;
+            _sessionStorageService = sessionStorageService;
         }
-
+        private async Task SetAuthorizationHeader()
+        {
+            var session = await _sessionStorageService.GetItemAsync<SessionServices>("session");
+            if (session != null && !string.IsNullOrEmpty(session.Key))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.Key);
+            }
+        }
         public async Task<string> CreateTask(string Name, string Description, string ReqFrom, int Enroll, int Project)
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<string>($"api/Task/CreateTask?Name={Name}&Description={Description}&ReqFrom={ReqFrom}&Enroll={Enroll}&Project={Project}");
                 return result;
             }
@@ -32,6 +45,7 @@ namespace ProjectManagement.Services.TaskM
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<List<ProjectPerUser>>($"api/Task/GetProjectByUser?Enroll={Enroll}");
                 return result;
             }
@@ -46,6 +60,7 @@ namespace ProjectManagement.Services.TaskM
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<List<Tasks>>($"api/Task/GetTasks?Enroll={Enroll}&Status={Status}");
                 return result;
             }
@@ -60,6 +75,7 @@ namespace ProjectManagement.Services.TaskM
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<Tasks>($"api/Task/GetCurrentTasks?Enroll={Enroll}");
                 return result;
             }
@@ -75,6 +91,7 @@ namespace ProjectManagement.Services.TaskM
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<List<Steps>>($"api/Task/GetStepsByTask?Task={Task}");
                 return result;
             }
@@ -89,6 +106,7 @@ namespace ProjectManagement.Services.TaskM
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<List<TransferUser>>($"api/Task/TransferCheck?Task={Task}&User={User}");
                 return result;
             }
@@ -103,6 +121,7 @@ namespace ProjectManagement.Services.TaskM
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<string>($"api/Task/StepManage?Type={Type}&Name={Name}&IsDone={IsDone}&StepID={StepID}&Enroll={Enroll}");
                 return result;
             }
@@ -117,6 +136,7 @@ namespace ProjectManagement.Services.TaskM
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<string>($"api/Task/TaskManage?Type={Type}&TaskID={TaskID}&User={User}&Status={Status}&Working={Working}&Enroll={Enroll}");
                 return result;
             }
