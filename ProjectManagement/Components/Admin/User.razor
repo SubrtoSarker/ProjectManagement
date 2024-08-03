@@ -209,7 +209,7 @@
     public SessionServices session = new SessionServices();
     public async void LoadUSer(int UserID)
     {
-        users = await admin.GetAllUser(UserID);
+        users = await admin.GetAllUser(UserID,session.Key);
         StateHasChanged();
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -251,7 +251,7 @@
     }
     private async void GetUser(int UserID)
     {
-        users = await admin.GetAllUser(UserID);
+        users = await admin.GetAllUser(UserID, session.Key);
         user = users.FirstOrDefault();
         Team = await admin.GetAllTeam();
         isActive = true;

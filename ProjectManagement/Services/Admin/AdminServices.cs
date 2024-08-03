@@ -1,19 +1,34 @@
-﻿using ProjectManagement.Models.Admin;
+﻿using Blazored.SessionStorage;
+using ProjectManagement.Models.Admin;
+using ProjectManagement.Services.Session;
+using System.Net.Http.Headers;
 
 namespace ProjectManagement.Services.Admin
 {
     public class AdminServices : IAdminServices
     {
         private readonly HttpClient _httpClient;
-        public AdminServices(HttpClient httpClient)
+        private readonly ISessionStorageService _sessionStorageService;
+
+        public AdminServices(HttpClient httpClient, ISessionStorageService sessionStorageService)
         {
             _httpClient = httpClient;
+            _sessionStorageService = sessionStorageService;
         }
 
-        public async Task<List<AllUser>> GetAllUser(int UserID)
+        private async Task SetAuthorizationHeader()
+        {
+            var session = await _sessionStorageService.GetItemAsync<SessionServices>("session");
+            if (session != null && !string.IsNullOrEmpty(session.Key))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.Key);
+            }
+        }
+        public async Task<List<AllUser>> GetAllUser(int UserID, string Code)
         {
             try
             {
+                await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<List<AllUser>>($"api/Admin/GetAllUser?UserID={UserID}");
                 return result;
             }

@@ -3,7 +3,7 @@ using ProjectManagement.Models.ProjectModel;
 using ProjectManagement.Models.Task;
 using System.Runtime.CompilerServices;
 
-namespace ProjectManagement.Services.Task
+namespace ProjectManagement.Services.TaskM
 {
     public class TaskServices : ITaskServices
     {

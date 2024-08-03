@@ -1,6 +1,6 @@
 ﻿using ProjectManagement.Models.Task;
 
-namespace ProjectManagement.Services.Task
+namespace ProjectManagement.Services.TaskM
 {
     public interface ITaskServices
     {
