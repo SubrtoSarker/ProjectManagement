@@ -24,7 +24,7 @@ namespace ProjectManagement.Services.Admin
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.Key);
             }
         }
-        public async Task<List<AllUser>> GetAllUser(int UserID, string Code)
+        public async Task<List<AllUser>> GetAllUser(int UserID)
         {
             try
             {
