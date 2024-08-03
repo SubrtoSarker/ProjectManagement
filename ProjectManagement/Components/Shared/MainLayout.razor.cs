@@ -39,14 +39,15 @@ namespace ProjectManagement.Components.Shared
             var menus = new List<MenuItem>
             {
                 new() { Text = "Home", Icon = "fa-solid fa-fw fa-home", Url = "/Home" , Match = NavLinkMatch.All},
-                new() { Text = "Tasks", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Task" },
-                new() { Text = "Project", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Project" },
-                new() { Text = "User", Icon = "fa-solid fa-fw fa-briefcase", Url = "/User" },
-                new() { Text = "Test", Icon = "fa-solid fa-fw fa-check-square", Url = "/Test" },
-                new() { Text = "Counter", Icon = "fa-solid fa-fw fa-check-square", Url = "/counter" },
-                new() { Text = "Weather", Icon = "fa-solid fa-fw fa-database", Url = "/weather" },
-                new() { Text = "Table", Icon = "fa-solid fa-fw fa-table", Url = "/table" },
-                new() { Text = "Roster", Icon = "fa-solid fa-fw fa-users", Url = "/users" }
+                new() { Text = "Tasks", Icon = "fa-solid fa-fw fa-tasks", Url = "/Task" },
+                new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" },
+                new() { Text = "Users", Icon = "fa-solid fa-fw fa-users-cog", Url = "/User" },
+
+                new() { Text = "Test", Icon = "fa-solid fa-vial", Url = "/Test" },
+                new() { Text = "Counter", Icon = "fa-solid fa-calculator", Url = "/counter" },
+                new() { Text = "Weather", Icon = "fa-solid fa-cloud-sun", Url = "/weather" },
+                new() { Text = "Table", Icon = "fa-solid fa-table", Url = "/table" },
+                new() { Text = "Roster", Icon = "fa-solid fa-users", Url = "/users" }
             };
 
             return menus;
@@ -56,34 +57,37 @@ namespace ProjectManagement.Components.Shared
             var menus = new List<MenuItem>
             {
                 new() { Text = "Home", Icon = "fa-solid fa-fw fa-home", Url = "/Home", Match = NavLinkMatch.All },
-                new() { Text = "Tasks", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Task" },
+                new() { Text = "Tasks", Icon = "fa-solid fa-fw fa-tasks", Url = "/Task" },
+
+
             };
 
             if (displayAccount == "All")
             {
                 menus.AddRange(new List<MenuItem>
                 {
-                    new() { Text = "Project", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Project" },
-                    new() { Text = "User", Icon = "fa-solid fa-fw fa-briefcase", Url = "/User" },
-                    new() { Text = "Test", Icon = "fa-solid fa-fw fa-check-square", Url = "/Test" },
-                    new() { Text = "Counter", Icon = "fa-solid fa-fw fa-check-square", Url = "/counter" },
-                    new() { Text = "Weather", Icon = "fa-solid fa-fw fa-database", Url = "/weather" },
-                    new() { Text = "Table", Icon = "fa-solid fa-fw fa-table", Url = "/table" },
-                    new() { Text = "Roster", Icon = "fa-solid fa-fw fa-users", Url = "/users" }
+                    new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" },
+                    new() { Text = "Users", Icon = "fa-solid fa-fw fa-users-cog", Url = "/User" },
+
+                    new() { Text = "Test", Icon = "fa-solid fa-vial", Url = "/Test" },
+                    new() { Text = "Counter", Icon = "fa-solid fa-calculator", Url = "/counter" },
+                    new() { Text = "Weather", Icon = "fa-solid fa-cloud-sun", Url = "/weather" },
+                    new() { Text = "Table", Icon = "fa-solid fa-table", Url = "/table" },
+                    new() { Text = "Roster", Icon = "fa-solid fa-users", Url = "/users" }
                 });
             }
             if (displayAccount == "Admin")
             {
                 menus.AddRange(new List<MenuItem>
                 {
-                    new() { Text = "User", Icon = "fa-solid fa-fw fa-briefcase", Url = "/User" },
+                    new() { Text = "User", Icon = "fa-solid fa-fw fa-users-cog", Url = "/User" },
                 });
             }
             if (displayAccount == "Superviser")
             {
                 menus.AddRange(new List<MenuItem>
                 {
-                    new() { Text = "Project", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Project" },
+                    new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" },
                 });
             }
             if (displayAccount == "User")
@@ -91,12 +95,7 @@ namespace ProjectManagement.Components.Shared
                 //menus.AddRange(new List<MenuItem>
                 //{
                 //    new() { Text = "Project", Icon = "fa-solid fa-fw fa-briefcase", Url = "/Project" },
-                //    new() { Text = "User", Icon = "fa-solid fa-fw fa-briefcase", Url = "/User" },
-                //    new() { Text = "Test", Icon = "fa-solid fa-fw fa-check-square", Url = "/Test" },
-                //    new() { Text = "Counter", Icon = "fa-solid fa-fw fa-check-square", Url = "/counter" },
-                //    new() { Text = "Weather", Icon = "fa-solid fa-fw fa-database", Url = "/weather" },
-                //    new() { Text = "Table", Icon = "fa-solid fa-fw fa-table", Url = "/table" },
-                //    new() { Text = "Roster", Icon = "fa-solid fa-fw fa-users", Url = "/users" }
+                //    new() { Text = "User", Icon = "fa-solid fa-fw fa-briefcase", Url = "/User" }
                 //});
             }
 
