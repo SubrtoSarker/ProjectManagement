@@ -36,22 +36,22 @@ builder.Services.Configure<HubOptions>(options => options.MaximumReceiveMessageS
 // Register HttpClient services
 builder.Services.AddHttpClient<IAuthServices, AuthServices>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5164/");
+    client.BaseAddress = new Uri("https://localhost:5164/");
 });
 
 builder.Services.AddHttpClient<IProjectService, ProjectService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5164/");
+    client.BaseAddress = new Uri("https://localhost:5164/");
 });
 
 builder.Services.AddHttpClient<IAdminServices, AdminServices>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5164/");
+    client.BaseAddress = new Uri("https://localhost:5164/");
 });
 
 builder.Services.AddHttpClient<ITaskServices, TaskServices>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5164/");
+    client.BaseAddress = new Uri("https://localhost:5164/");
 });
 
 // Register scoped services
