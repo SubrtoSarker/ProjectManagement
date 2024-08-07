@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Components\Tasks\UserTaskReport.razor" />
     <Content Remove="Locales\en.json" />
   </ItemGroup>
 
@@ -21,18 +20,6 @@
     <PackageReference Include="BootstrapBlazor.FontAwesome" Version="8.*" />
     <PackageReference Include="js-cookie" Version="2.2.1" />
     <PackageReference Include="NetcodeHub.Packages.Components.Validations" Version="1.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Components\Tasks\UserTaskReport.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Components\Tasks\UserTaskReport.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Components\Tasks\UserTaskReport.razor" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,28 @@
+﻿@page "/PersonalReport"
+@attribute [TabItemOption(Text = "Personal Report")]
+@using ProjectManagement.Services.Session
+@inject IJSRuntime JSRuntime
+@inject ToastService Tost
+@inject Blazored.SessionStorage.ISessionStorageService sess
+
+<PageTitle>Personal Report</PageTitle>
+<h2>Hi</h2>
+
+@code {
+    public SessionServices session = new SessionServices();
+    public async void LoadUSer(int UserID)
+    {
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            LoadUSer(0);
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        session = await sess.GetItemAsync<SessionServices>("session");
+        LoadUSer(0);
+    }
+}

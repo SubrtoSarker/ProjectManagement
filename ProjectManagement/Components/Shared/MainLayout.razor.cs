@@ -59,7 +59,7 @@ namespace ProjectManagement.Components.Shared
             {
                 new() { Text = "Home", Icon = "fa-solid fa-fw fa-home", Url = "/Home", Match = NavLinkMatch.All },
                 new() { Text = "Tasks", Icon = "fa-solid fa-fw fa-tasks", Url = "/Task" },
-                new() { Text = "Task Report", Icon = "fa-solid fa-fw fa-chart-line", Url = "/TaskReport" },
+                new() { Text = "Task Report", Icon = "fa-solid fa-fw fa-chart-line", Url = "/PersonalReport" },
             };
 
             if (displayAccount == "All")
