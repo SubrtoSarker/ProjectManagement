@@ -34,24 +34,27 @@ builder.Services.AddTableDemoDataService();
 builder.Services.Configure<HubOptions>(options => options.MaximumReceiveMessageSize = null);
 
 // Register HttpClient services
+var baseAddress = new Uri("https://localhost:5164/");
+
+// Register the HttpClient services using the declared base address
 builder.Services.AddHttpClient<IAuthServices, AuthServices>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:5164/");
+    client.BaseAddress = baseAddress;
 });
 
 builder.Services.AddHttpClient<IProjectService, ProjectService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:5164/");
+    client.BaseAddress = baseAddress;
 });
 
 builder.Services.AddHttpClient<IAdminServices, AdminServices>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:5164/");
+    client.BaseAddress = baseAddress;
 });
 
 builder.Services.AddHttpClient<ITaskServices, TaskServices>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:5164/");
+    client.BaseAddress = baseAddress;
 });
 
 // Register scoped services
