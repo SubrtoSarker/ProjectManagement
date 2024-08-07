@@ -35,8 +35,6 @@ builder.Services.Configure<HubOptions>(options => options.MaximumReceiveMessageS
 
 // Register HttpClient services
 var baseAddress = new Uri("https://localhost:5164/");
-
-// Register the HttpClient services using the declared base address
 builder.Services.AddHttpClient<IAuthServices, AuthServices>(client =>
 {
     client.BaseAddress = baseAddress;
