@@ -12,5 +12,6 @@ namespace ProjectManagement.Services.TaskM
         Task<List<TransferUser>> TransferCheck(int Task, int User);
         Task<string> StepManage(int Type, string Name, bool IsDone, int StepID, int Enroll);
         Task<string> TaskManage(int Type, int TaskID, int User, int Status, TimeSpan Working, int Enroll);
+        Task<List<Performance>> GetPerFormance(DateTime From, DateTime To, int User, int Project);
     }
 }
