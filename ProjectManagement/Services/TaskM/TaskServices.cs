@@ -41,12 +41,12 @@ namespace ProjectManagement.Services.TaskM
             }
         }
 
-        public async Task<List<ProjectPerUser>> GetProjectByUser(int Enroll)
+        public async Task<List<ProjectPerUser>> GetProjectByUser(int Enroll, int Type)
         {
             try
             {
                 await SetAuthorizationHeader();
-                var result = await _httpClient.GetFromJsonAsync<List<ProjectPerUser>>($"api/Task/GetProjectByUser?Enroll={Enroll}");
+                var result = await _httpClient.GetFromJsonAsync<List<ProjectPerUser>>($"api/Task/GetProjectByUser?Enroll={Enroll}&Type={Type}");
                 return result;
             }
             catch (Exception ex)

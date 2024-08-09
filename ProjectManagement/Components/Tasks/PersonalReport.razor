@@ -1,28 +1,167 @@
 ﻿@page "/PersonalReport"
 @attribute [TabItemOption(Text = "Personal Report")]
+@using ProjectManagement.Models.Task
+@using ProjectManagement.Models.AddistionalModels
 @using ProjectManagement.Services.Session
+@using ProjectManagement.Services.TaskM
+@inject ITaskServices task
 @inject IJSRuntime JSRuntime
 @inject ToastService Tost
 @inject Blazored.SessionStorage.ISessionStorageService sess
 
-<PageTitle>Personal Report</PageTitle>
-<h2>Hi</h2>
+<PageTitle>My Performance Report</PageTitle>
+
+<h3>Personal Report</h3>
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <label for="project" class="form-label">Project:</label>
+        <select id="project" class="form-select" @bind="selectedProject">
+            @foreach (var i in projects)
+            {
+                <option value="@i.intProjectID">@i.strProjectName</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3 mb-3">
+        <label for="reportType" class="form-label">Report Type:</label>
+        <select id="reportType" class="form-select" @onchange="OnReportTypeChanged">
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly">Monthly</option>
+            <option value="Custom">Custom</option>
+        </select>
+    </div>
+
+    @if (selectedReportType == "Daily")
+    {
+        <div class="col-md-3 mb-3">
+            <label for="dailyDate" class="form-label">Select Date:</label>
+            <input type="date" id="dailyDate" class="form-control" @bind="customDate" />
+        </div>
+    }
+    else if (selectedReportType == "Weekly")
+    {
+        <div class="col-md-3 mb-3">
+            <label for="weeklyDate" class="form-label">Select Week:</label>
+            <select id="weeklyDate" class="form-select" @bind="selectedDate">
+                @foreach (var week in Week)
+                {
+                    <option value="@week.Value">@week.Text</option>
+                }
+            </select>
+        </div>
+    }
+    else if (selectedReportType == "Monthly")
+    {
+        <div class="col-md-3 mb-3">
+            <label for="monthlyDate" class="form-label">Select Month:</label>
+            <select id="monthlyDate" class="form-select" @bind="selectedDate">
+                @foreach (var month in Month)
+                {
+                    <option value="@month.Value">@month.Text</option>
+                }
+            </select>
+        </div>
+    }
+    else if (selectedReportType == "Custom")
+    {
+        <div class="col-md-2 mb-3">
+            <label for="startDate" class="form-label">Start Date:</label>
+            <input type="date" id="startDate" class="form-control" @bind="customStartDate" />
+        </div>
+        <div class="col-md-2 mb-3">
+            <label for="endDate" class="form-label">End Date:</label>
+            <input type="date" id="endDate" class="form-control" @bind="customEndDate" />
+        </div>
+    }
+
+    <div class="col-md-2 mb-3 align-self-end">
+        <button class="btn btn-primary" @onclick="SubmitReport">Show</button>
+    </div>
+</div>
 
 @code {
     public SessionServices session = new SessionServices();
-    public async void LoadUSer(int UserID)
-    {
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            LoadUSer(0);
-        }
-    }
+
+    private int selectedProject;
+    private string selectedReportType = "Daily";
+    private string selectedDate;
+    private DateTime customStartDate;
+    private DateTime customEndDate;
+    private DateTime customDate;
+    private List<ValueText> Week = new List<ValueText>();
+    private List<ValueText> Month = new List<ValueText>();
+
+    private List<ProjectPerUser> projects = new List<ProjectPerUser>();
     protected override async Task OnInitializedAsync()
     {
         session = await sess.GetItemAsync<SessionServices>("session");
-        LoadUSer(0);
+        projects = await task.GetProjectByUser(session.UserID, 1);
+        GenerateDates();
+        SetDefaultSelectedDate();
+        customEndDate = DateTime.Today;
+        customDate = DateTime.Today;
+        customStartDate = customEndDate.AddDays(-7);
+    }
+
+    private void GenerateDates()
+    {
+        var today = DateTime.Today;
+
+        // Generate weekly dates (current week to last 7 weeks)
+        Week.Clear();
+        for (int i = 0; i < 20; i++)
+        {
+            var startOfWeek = today.AddDays(-(int)today.DayOfWeek - (7 * i));
+            var endOfWeek = startOfWeek.AddDays(6);
+
+            // Format value and text as per the requirement
+            Week.Add(new ValueText
+            {
+                Value = $"{startOfWeek:yyyy-MM-dd} [] {endOfWeek:yyyy-MM-dd}",
+                Text = $"{startOfWeek:MMMM d} to {endOfWeek:MMMM d}"
+            });
+        }
+
+        // Generate monthly dates (current month to last 12 months)
+        Month.Clear();
+        for (int i = 0; i < 12; i++)
+        {
+            var month = today.AddMonths(-i);
+            var startOfMonth = new DateTime(month.Year, month.Month, 1);
+            var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+            Month.Add(new ValueText
+            {
+                Value = $"{startOfMonth:yyyy-MM-dd} [] {endOfMonth:yyyy-MM-dd}",
+                Text = month.ToString("MMMM yyyy")
+            });
+        }
+    }
+
+    private void SetDefaultSelectedDate()
+    {
+        if (selectedReportType == "Weekly" && Week.Count > 0)
+        {
+            selectedDate = Week[0].Value;
+        }
+        else if (selectedReportType == "Monthly" && Month.Count > 0)
+        {
+            selectedDate = Month[0].Value;
+        }
+    }
+    private void OnReportTypeChanged(ChangeEventArgs e)
+    {
+        selectedReportType = e.Value.ToString();
+        SetDefaultSelectedDate();
+        StateHasChanged(); // Ensure UI updates correctly
+    }
+    private async Task SubmitReport()
+    {
+        if (selectedReportType == "Custom" && (customStartDate == DateTime.MinValue || customEndDate == DateTime.MinValue))
+        {
+            await Tost.Warning("Please select valid start and end dates for the custom report.");
+            return;
+        }
+        await Tost.Success("Report submitted successfully!");
     }
 }

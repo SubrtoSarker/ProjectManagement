@@ -4,7 +4,7 @@ namespace ProjectManagement.Services.TaskM
 {
     public interface ITaskServices
     {
-        Task<List<ProjectPerUser>> GetProjectByUser(int Enroll);
+        Task<List<ProjectPerUser>> GetProjectByUser(int Enroll, int Type);
         Task<string> CreateTask(string Name, string Description, string ReqFrom, int Enroll, int Project);
         Task<List<Tasks>> GetTasks(int Enroll, int Status);
         Task<Tasks> GetCurrentTasks(int Enroll);

@@ -112,7 +112,7 @@
     }
     public async void load()
     {
-        ppu = await task.GetProjectByUser(session.UserID);
+        ppu = await task.GetProjectByUser(session.UserID,0);
         StateHasChanged();
     }
     protected override async Task OnInitializedAsync()
