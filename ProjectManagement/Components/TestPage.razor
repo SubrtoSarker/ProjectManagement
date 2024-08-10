@@ -1,64 +1,53 @@
-﻿
-@page "/Test"
+﻿@page "/Test"
 @using ProjectManagement.Models.ProjectModel
+@using ProjectManagement.Models.Task
+@using ProjectManagement.Services.TaskM
+@using System.Text.Json
 @attribute [TabItemOption(Text = "Test")]
-
+@inject IJSRuntime JSRuntime
 @inject ToastService Tost
+@inject ITaskServices task
 
 <PageTitle>Test</PageTitle>
 <h3>TestPage</h3>
-<Button @onclick="@info">Info</Button>
-<Button @onclick="@Success">Success</Button>
 
-<Button @onclick="@warning">warning</Button>
+<!-- Your buttons and modal here -->
 
-<Button @onclick="@Danger">Error</Button>
-
-
-<button class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#AddTask">
-    Add New Task
-</button>
-<div class="modal fade fade-in-modal" id="AddTask" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-center">Add New Project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="taskName" class="form-label">Task Name</label>
-                    <input type="text" class="form-control" id="taskName" @bind="newProject.Name" placeholder="Enter task name">
-                </div>
-
-                <button type="button" data-bs-dismiss="modal" class="btn btn-primary" @onclick="AddNewTask">ADD</button>
-            </div>
-        </div>
+<div class="row">
+    <div class="col-md-6">
+        <h4>Task Distribution</h4>
+        <div id="chartdiv" style="width: 100%; height: 500px;"></div>
     </div>
 </div>
 
 @code {
-    public void info()
-    {
-        Tost.Information("This is Titel", "This is Contest", true);
-    }
-    public void Success()
-    {
-        Tost.Success("This is Titel", "This is Contest", true);
-    }
-    public void warning()
-    {
-        Tost.Warning("This is Titel", "This is Contest", true);
-    }
-    public void Danger()
-    {
-        Tost.Error("This is Titel", "This is Contest", true);
-    }
+    public void info() => Tost.Information("This is Title", "This is Content", true);
+    public void Success() => Tost.Success("This is Title", "This is Content", true);
+    public void warning() => Tost.Warning("This is Title", "This is Content", true);
+    public void Danger() => Tost.Error("This is Title", "This is Content", true);
+
     private ProjectCreate newProject = new ProjectCreate();
-    private async void AddNewTask()
+
+    private async void AddNewTask() => await Tost.Success("This is Title", "This is Content", true);
+
+    private List<Performance> Performance = new List<Performance>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await Tost.Success("This is Titel", "This is Contest", true);
+        if (firstRender)
+        {
+            await ShowDonutChart();
+        }
+    }
+
+    private async Task ShowDonutChart()
+    {
+        DateTime fromDate = new DateTime(2024, 1, 1);
+        DateTime toDate = DateTime.Today;
+
+        Performance = await task.GetPerFormance(fromDate, toDate, 2, 0);
+
+        var jsonData = JsonSerializer.Serialize(Performance);
+        await JSRuntime.InvokeVoidAsync("createDonutChart", jsonData);
     }
 }

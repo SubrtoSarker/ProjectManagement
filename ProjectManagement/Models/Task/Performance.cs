@@ -11,5 +11,6 @@ namespace ProjectManagement.Models.Task
         public string strRequestFrom { get; set; }
         public string strProjectName { get; set; }
         public TimeSpan tmWorking { get; set; }
+        public Decimal WorkPercent { get; set; }
     }
 }
