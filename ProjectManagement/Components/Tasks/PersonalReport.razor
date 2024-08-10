@@ -91,6 +91,7 @@
     private DateTime customDate;
     private List<ValueText> Week = new List<ValueText>();
     private List<ValueText> Month = new List<ValueText>();
+    private List<Performance> Performance = new List<Performance>();
 
     private List<ProjectPerUser> projects = new List<ProjectPerUser>();
     protected override async Task OnInitializedAsync()
@@ -157,11 +158,44 @@
     }
     private async Task SubmitReport()
     {
-        if (selectedReportType == "Custom" && (customStartDate == DateTime.MinValue || customEndDate == DateTime.MinValue))
+        try
         {
-            await Tost.Warning("Please select valid start and end dates for the custom report.");
-            return;
+            if (selectedReportType == "Custom" && (customStartDate == DateTime.MinValue || customEndDate == DateTime.MinValue))
+            {
+                await Tost.Warning("Please select valid start and end dates for the custom report.");
+                return;
+            }
+            DateTime From;
+            DateTime To;
+            if (selectedReportType == "Daily")
+            {
+                From = customDate;
+                To = customDate;
+            }
+            else if (selectedReportType == "Weekly" || selectedReportType == "Monthly")
+            {
+                string date = selectedDate;
+                string[] dates = date.Split(new string[] { " [] " }, StringSplitOptions.None);
+                From = Convert.ToDateTime(dates[0].ToString());
+                To = Convert.ToDateTime(dates[1].ToString());
+            }
+            else if (selectedReportType == "Custom")
+            {
+                From = customStartDate;
+                To = customEndDate;
+            }
+            else
+            {
+                From = DateTime.Now;
+                To = DateTime.Now;
+            }
+            Performance = await task.GetPerFormance(From, To, session.UserID, selectedProject);
+
         }
-        await Tost.Success("Report submitted successfully!");
+        catch (Exception ex)
+        {
+            await Tost.Error(ex.Message);
+        }
+
     }
 }
