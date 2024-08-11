@@ -8,6 +8,7 @@
             am5themes_Animated.new(root)
         ]);
 
+        // Create the chart
         var chart = root.container.children.push(am5percent.PieChart.new(root, {
             layout: root.verticalLayout
         }));
@@ -25,16 +26,17 @@
         series.slices.template.set("tooltipY", 0);
         series.slices.template.set("tooltipX", 0);
 
-        // Add legend and adjust its position
-        var legend = chart.children.push(am5.Legend.new(root, {
-            position: "bottom",  // Move legend to the bottom
-            marginRight: 15,
-            marginTop: 15,        // Add some margin for better spacing
-            layout: root.horizontalLayout // Layout options: horizontal, vertical
+        // Add legend to the same container
+        var legend = root.container.children.push(am5.Legend.new(root, {
+            position: "bottom",
+            layout: root.horizontalLayout,
+            marginTop: 20, // Space between chart and legend
+            marginBottom: 10 // Additional bottom margin to avoid overlap
         }));
 
         legend.data.setAll(series.dataItems);
 
+        // Ensure the series appears
         series.appear(1000, 100);
     });
 }
