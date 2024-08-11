@@ -29,15 +29,16 @@
 
         series.data.setAll(chartData);
 
-        // Add tooltips
-        series.slices.template.set("tooltipText", "{category}: {value}%");
+        // Format tooltip to show tmWorking
+        series.slices.template.set("tooltipText", "{category}: {tmWorking}");
 
         // Create a container for the legend
         var legendContainer = container.children.push(am5.Container.new(root, {
             layout: root.verticalLayout,
             width: am5.percent(20), // Space allocated for the legend
             height: am5.percent(100),
-            marginLeft: 20 // Space between chart and legend
+            marginTop: 20, // Adjusted top margin to move the legend slightly down
+            marginLeft: 0 // Space between chart and legend
         }));
 
         // Add the legend
