@@ -25,16 +25,15 @@
         series.slices.template.set("tooltipY", 0);
         series.slices.template.set("tooltipX", 0);
 
-        // Add event handler for slice clicks
-        series.slices.template.events.on("hit", function (ev) {
-            var slice = ev.target;
-            var dataItem = slice.dataItem;
-            var title = dataItem.category;
-            var value = dataItem.value;
+        // Add legend and adjust its position
+        var legend = chart.children.push(am5.Legend.new(root, {
+            position: "bottom",  // Move legend to the bottom
+            marginRight: 15,
+            marginTop: 15,        // Add some margin for better spacing
+            layout: root.horizontalLayout // Layout options: horizontal, vertical
+        }));
 
-            // Display custom information when a slice is clicked
-            console.log("Task:", title, "Percent:", value, "Work Time:", value);
-        });
+        legend.data.setAll(series.dataItems);
 
         series.appear(1000, 100);
     });
