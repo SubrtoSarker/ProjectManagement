@@ -1,5 +1,4 @@
-﻿// chart.js
-function createDonutChart(data) {
+﻿function createDonutChart(data) {
     var chartData = JSON.parse(data);
 
     am5.ready(function () {
@@ -21,29 +20,21 @@ function createDonutChart(data) {
 
         series.data.setAll(chartData);
 
-        // Add labels
+        // Add tooltips
+        series.slices.template.set("tooltipText", "{category}: {value}%");
+        series.slices.template.set("tooltipY", 0);
+        series.slices.template.set("tooltipX", 0);
+
+        // Add event handler for slice clicks
         series.slices.template.events.on("hit", function (ev) {
             var slice = ev.target;
             var dataItem = slice.dataItem;
             var title = dataItem.category;
             var value = dataItem.value;
 
-            // Display custom labels or headers
-            console.log("Task:", title, "Percent:", value, "Work Time:", value); // You can customize this
+            // Display custom information when a slice is clicked
+            console.log("Task:", title, "Percent:", value, "Work Time:", value);
         });
-
-        // Add legend
-        var legend = chart.children.push(am5.Legend.new(root, {
-            position: "right",
-            marginRight: 15
-        }));
-
-        legend.data.setAll(series.dataItems);
-
-        // Configure tooltips
-        series.slices.template.set("tooltipText", "{category}: {value}%");
-        series.slices.template.set("tooltipY", 0);
-        series.slices.template.set("tooltipX", 0);
 
         series.appear(1000, 100);
     });
