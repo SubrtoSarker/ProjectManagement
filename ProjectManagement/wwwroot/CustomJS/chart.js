@@ -8,7 +8,7 @@
             am5themes_Animated.new(root)
         ]);
 
-        // Create a container for the chart and legend
+        // Create a container with horizontal layout
         var container = root.container.children.push(am5.Container.new(root, {
             layout: root.horizontalLayout,
             width: am5.percent(100),
@@ -18,7 +18,6 @@
         // Create the chart
         var chart = container.children.push(am5percent.PieChart.new(root, {
             innerRadius: am5.percent(40), // Creates the donut effect
-            layout: root.verticalLayout, // Ensures the chart takes up vertical space
             width: am5.percent(80) // Adjust width as needed
         }));
 
@@ -32,14 +31,20 @@
 
         // Add tooltips
         series.slices.template.set("tooltipText", "{category}: {value}%");
-        series.slices.template.set("tooltipY", 0);
-        series.slices.template.set("tooltipX", 0);
 
-        // Add the legend to the right side
-        var legend = container.children.push(am5.Legend.new(root, {
+        // Create a container for the legend
+        var legendContainer = container.children.push(am5.Container.new(root, {
             layout: root.verticalLayout,
-            position: "right",
+            width: am5.percent(20), // Space allocated for the legend
+            height: am5.percent(100),
             marginLeft: 20 // Space between chart and legend
+        }));
+
+        // Add the legend
+        var legend = legendContainer.children.push(am5.Legend.new(root, {
+            layout: root.verticalLayout,
+            width: am5.percent(100),
+            height: am5.percent(100)
         }));
 
         legend.data.setAll(series.dataItems);
