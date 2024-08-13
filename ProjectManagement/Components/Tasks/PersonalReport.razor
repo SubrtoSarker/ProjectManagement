@@ -4,6 +4,7 @@
 @using ProjectManagement.Models.AddistionalModels
 @using ProjectManagement.Services.Session
 @using ProjectManagement.Services.TaskM
+@using System.Text.Json
 @inject ITaskServices task
 @inject IJSRuntime JSRuntime
 @inject ToastService Tost
@@ -77,6 +78,13 @@
 
     <div class="col-md-2 mb-3 align-self-end">
         <button class="btn btn-primary" @onclick="SubmitReport">Show</button>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12" style="overflow-x: auto;">
+            <div id="chartdiv" style="width: 100%; height: 500px; position: relative;"></div>
+        </div>
     </div>
 </div>
 
@@ -190,6 +198,10 @@
                 To = DateTime.Now;
             }
             Performance = await task.GetPerFormance(From, To, session.UserID, selectedProject);
+            if (Performance.Count>0)
+            {
+                await ShowDonutChart();
+            }
 
         }
         catch (Exception ex)
@@ -197,5 +209,10 @@
             await Tost.Error(ex.Message);
         }
 
+    }
+    private async Task ShowDonutChart()
+    {
+        var jsonData = JsonSerializer.Serialize(Performance);
+        await JSRuntime.InvokeVoidAsync("createDonutChart", jsonData);
     }
 }
