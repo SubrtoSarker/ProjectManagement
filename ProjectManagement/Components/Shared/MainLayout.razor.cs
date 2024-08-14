@@ -40,7 +40,7 @@ namespace ProjectManagement.Components.Shared
             {
                 new() { Text = "Home", Icon = "fa-solid fa-fw fa-home", Url = "/Home" , Match = NavLinkMatch.All},
                 new() { Text = "Tasks", Icon = "fa-solid fa-fw fa-tasks", Url = "/Task" },
-                new() { Text = "Task Report", Icon = "fa-solid fa-fw fa-chart-line", Url = "/TaskReport" },
+                new() { Text = "Progress Report", Icon = "fa-solid fa-fw fa-chart-line", Url = "/TaskReport" },
                 new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" },
                 new() { Text = "Users", Icon = "fa-solid fa-fw fa-users-cog", Url = "/User" },
 
@@ -59,7 +59,7 @@ namespace ProjectManagement.Components.Shared
             {
                 new() { Text = "Home", Icon = "fa-solid fa-fw fa-home", Url = "/Home", Match = NavLinkMatch.All },
                 new() { Text = "Tasks", Icon = "fa-solid fa-fw fa-tasks", Url = "/Task" },
-                new() { Text = "Task Report", Icon = "fa-solid fa-fw fa-chart-line", Url = "/PersonalReport" },
+                new() { Text = "Progress Report", Icon = "fa-solid fa-fw fa-chart-line", Url = "/PersonalReport" },
             };
 
             if (displayAccount == "All")
