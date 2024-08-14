@@ -1,8 +1,16 @@
-﻿function createDonutChart(data) {
-    var chartData = JSON.parse(data);
+﻿let root; // Declare a global variable to store the root instance
 
+function createDonutChart(data) {
+    var chartData = JSON.parse(data);
+    // Check if there's an existing root and dispose of it
+    if (root) {
+        root.dispose();
+    }
+
+    // Initialize the chart only once am5 is ready
     am5.ready(function () {
-        var root = am5.Root.new("chartdiv");
+        // Create a new root instance and store it in the global variable
+        root = am5.Root.new("chartdiv");
 
         root.setThemes([
             am5themes_Animated.new(root)
