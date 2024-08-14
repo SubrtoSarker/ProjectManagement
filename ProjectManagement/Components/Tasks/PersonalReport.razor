@@ -109,7 +109,8 @@
     private List<ValueText> Week = new List<ValueText>();
     private List<ValueText> Month = new List<ValueText>();
     private List<Performance> Performance = new List<Performance>();
-
+    private DateTime From;
+    private DateTime To;
     private List<ProjectPerUser> projects = new List<ProjectPerUser>();
     protected override async Task OnInitializedAsync()
     {
@@ -182,8 +183,7 @@
                 await Tost.Warning("Please select valid start and end dates for the custom report.");
                 return;
             }
-            DateTime From;
-            DateTime To;
+            
             if (selectedReportType == "Daily")
             {
                 From = customDate;
@@ -234,20 +234,24 @@
                 var worksheet = workbook.Worksheets.Add("Performance Data");
 
                 // Add headers
-                worksheet.Cell(1, 1).Value = "Task Name";
-                worksheet.Cell(1, 2).Value = "Description";
-                worksheet.Cell(1, 3).Value = "Request From";
-                worksheet.Cell(1, 4).Value = "Project Name";
-                worksheet.Cell(1, 5).Value = "Working Time";
+                worksheet.Cell(1, 1).Value = "From";
+                worksheet.Cell(1, 2).Value = "To";
+                worksheet.Cell(1, 3).Value = "Task Name";
+                worksheet.Cell(1, 4).Value = "Description";
+                worksheet.Cell(1, 5).Value = "Request From";
+                worksheet.Cell(1, 6).Value = "Project Name";
+                worksheet.Cell(1, 7).Value = "Working Time";
 
                 // Add data
                 for (int i = 0; i < Performance.Count; i++)
                 {
-                    worksheet.Cell(i + 2, 1).Value = Performance[i].strTaskName;
-                    worksheet.Cell(i + 2, 2).Value = Performance[i].strDescription;
-                    worksheet.Cell(i + 2, 3).Value = Performance[i].strRequestFrom;
-                    worksheet.Cell(i + 2, 4).Value = Performance[i].strProjectName;
-                    worksheet.Cell(i + 2, 5).Value = Performance[i].tmWorking.ToString();
+                    worksheet.Cell(i + 2, 1).Value = From.ToString("dd-MM-yyyy");
+                    worksheet.Cell(i + 2, 2).Value = To.ToString("dd-MM-yyyy");
+                    worksheet.Cell(i + 2, 3).Value = Performance[i].strTaskName;
+                    worksheet.Cell(i + 2, 4).Value = Performance[i].strDescription;
+                    worksheet.Cell(i + 2, 5).Value = Performance[i].strRequestFrom;
+                    worksheet.Cell(i + 2, 6).Value = Performance[i].strProjectName;
+                    worksheet.Cell(i + 2, 7).Value = Performance[i].tmWorking.ToString();
                 }
 
                 // Auto-fit columns
@@ -258,7 +262,7 @@
                 {
                     workbook.SaveAs(stream);
                     var fileContents = stream.ToArray();
-                    var fileName = $"PerformanceData_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                    var fileName = $"PerformanceReport.xlsx";
                     await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(fileContents));
                 }
             }
