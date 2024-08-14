@@ -198,10 +198,7 @@
                 To = DateTime.Now;
             }
             Performance = await task.GetPerFormance(From, To, session.UserID, selectedProject);
-            if (Performance.Count>0)
-            {
-                await ShowDonutChart();
-            }
+            await ShowDonutChart();
 
         }
         catch (Exception ex)
