@@ -80,6 +80,11 @@
         <button class="btn btn-primary" @onclick="SubmitReport">Show</button>
     </div>
 </div>
+@if (Performance.Count > 0)
+{
+    <button class="btn btn-secondary" @onclick="PrintChartDiv">Print</button>
+}
+
 <div class="container">
     <div class="row">
         <div class="col-md-12" style="overflow-x: auto;">
@@ -211,5 +216,9 @@
     {
         var jsonData = JsonSerializer.Serialize(Performance);
         await JSRuntime.InvokeVoidAsync("createDonutChart", jsonData);
+    }
+    private async Task PrintChartDiv()
+    {
+        await JSRuntime.InvokeVoidAsync("printDiv", "chartdiv");
     }
 }

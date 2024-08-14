@@ -8,10 +8,19 @@
 
   <ItemGroup>
     <Content Remove="Locales\en.json" />
+    <Content Remove="wwwroot\CustomJS\Ext.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\CustomJS\Ext.js" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Locales\en.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\CustomJS\Ext.js" />
   </ItemGroup>
 
   <ItemGroup>
