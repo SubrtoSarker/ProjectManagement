@@ -1,12 +1,6 @@
 ﻿function createDonutChart(data) {
     var chartData = JSON.parse(data);
-    am5.array.each(am5.registry.rootElements,
-        function (root) {
-            if (root.dom.id == "chartdiv") {
-                root.dispose();
-            }
-        }
-    );
+
     am5.ready(function () {
         var root = am5.Root.new("chartdiv");
 
