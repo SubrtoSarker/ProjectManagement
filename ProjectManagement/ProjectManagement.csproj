@@ -28,6 +28,7 @@
     <PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
     <PackageReference Include="BootstrapBlazor" Version="8.*" />
     <PackageReference Include="BootstrapBlazor.FontAwesome" Version="8.*" />
+    <PackageReference Include="ClosedXML" Version="0.102.3" />
     <PackageReference Include="js-cookie" Version="2.2.1" />
     <PackageReference Include="NetcodeHub.Packages.Components.Validations" Version="1.0.1" />
   </ItemGroup>

@@ -8,3 +8,11 @@
     newWindow.document.close();
     newWindow.print();
 }
+function downloadFile(fileName, fileContentBase64) {
+    var link = document.createElement('a');
+    link.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + fileContentBase64;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
