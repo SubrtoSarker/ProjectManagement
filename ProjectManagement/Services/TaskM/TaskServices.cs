@@ -192,5 +192,20 @@ namespace ProjectManagement.Services.TaskM
                 return null;
             }
         }
+        public async Task<List<Notify>> GetNotify(int User)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<List<Notify>>($"api/Task/GetNotify?Enroll=2");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

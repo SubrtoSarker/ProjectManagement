@@ -1,4 +1,9 @@
-﻿<DropdownWidget class="px-3">
+﻿@using ProjectManagement.Models.Task
+@using ProjectManagement.Services.Session
+@using ProjectManagement.Services.TaskM
+@inject Blazored.SessionStorage.ISessionStorageService sess
+@inject ITaskServices task
+<DropdownWidget class="px-3">
     @* <DropdownWidgetItem Icon="fa-regular fa-envelope" BadgeNumber="4">
         <HeaderTemplate>
             <span>You have 4 unread messages</span>
@@ -26,24 +31,31 @@
             </a>
         </FooterTemplate>
     </DropdownWidgetItem> *@
-    <DropdownWidgetItem Icon="fa-regular fa-bell" BadgeNumber="10" HeaderColor="Color.Success" BadgeColor="Color.Warning">
+    <DropdownWidgetItem Icon="fa-regular fa-bell" BadgeNumber="@NewNotificationCount.ToString()" HeaderColor="Color.Success" BadgeColor="Color.Warning">
         <HeaderTemplate>
-            <span>You have 10 unread notifications</span>
+            <span>You have @NewNotificationCount unread notifications</span>
         </HeaderTemplate>
         <BodyTemplate>
-            @for (var index = 0; index < 10; index++)
+            @* @for (var index = 0; index < 10; index++)
             {
                 <a class="dropdown-item d-flex align-items-center" href="#" @onclick:preventDefault>
                     <i class="fa fa-users text-primary"></i>
                     <div class="ms-2">5 new members joined</div>
                 </a>
+            } *@
+            @foreach (var i in Notify)
+            {
+                <a class="dropdown-item d-flex align-items-center" href="#" @onclick:preventDefault>
+                    <i class="fa fa-users text-primary"></i>
+                    <div class="ms-2">@i.Msg</div>
+                </a>
             }
         </BodyTemplate>
-        <FooterTemplate>
+        @* <FooterTemplate>
             <a href="#" @onclick:preventDefault>
                 View all notifications
             </a>
-        </FooterTemplate>
+        </FooterTemplate> *@
     </DropdownWidgetItem>
     @* <DropdownWidgetItem Icon="fa-regular fa-flag" BadgeNumber="9" HeaderColor="Color.Danger" BadgeColor="Color.Danger">
         <HeaderTemplate>
@@ -79,3 +91,25 @@
         </FooterTemplate>
     </DropdownWidgetItem> *@
 </DropdownWidget>
+@code{
+    public List<Notify> Notify = new List<Notify>();
+    public SessionServices session = new SessionServices();
+    public int NewNotificationCount=0;
+    private async void Load()
+    {
+        Notify = await task.GetNotify(session.UserID);
+        foreach (var i in Notify)
+        {
+            if (i.isNew)
+            {
+                NewNotificationCount ++;
+            }
+        }
+        StateHasChanged();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        session = await sess.GetItemAsync<SessionServices>("session");
+        Load();
+    }
+}

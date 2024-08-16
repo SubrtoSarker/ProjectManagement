@@ -15,5 +15,6 @@ namespace ProjectManagement.Services.TaskM
         Task<List<Performance>> GetPerFormance(DateTime From, DateTime To, int User, int Project);
         Task<string> Request(string TaskName, string Description, string RequestFrom, int USerID, int Project, DateTime Date, int Status, TimeSpan tm, string From, string To);
         Task<List<Request>> GetRequest(int User, Boolean isSuperviser);
+        Task<List<Notify>> GetNotify(int User);
     }
 }
