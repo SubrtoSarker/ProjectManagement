@@ -106,5 +106,21 @@ namespace ProjectManagement.Services.Project
             }
         }
 
+        public async Task<string> RequestAction(int RequestID, int Enroll, int Type)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<string>($"api/Project/RequestAction?RequestID={RequestID}&Enroll={Enroll}&Type={Type}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
+
     }
 }

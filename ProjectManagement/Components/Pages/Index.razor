@@ -1,6 +1,7 @@
 ﻿@page "/Home"
 @attribute [TabItemOption(Text = "Index", Closable = false)]
 @using ProjectManagement.Models.Task
+@using ProjectManagement.Services.Project
 @using ProjectManagement.Services.Session
 @using ProjectManagement.Services.TaskM
 @using NetcodeHub.Packages.Components.Validations.OnInput;
@@ -8,6 +9,7 @@
 @inject ITaskServices task
 @inject IJSRuntime JSRuntime
 @inject ToastService Tost
+@inject IProjectService project
 <PageTitle>Index</PageTitle>
 
 
@@ -61,6 +63,7 @@
 
 <div class="row justify-content-center">
     <div class="col-md-12">
+        <br />
         @if (PR.Any())
         {
             <h3 class="text-center">Pending Requests</h3>
@@ -102,6 +105,53 @@
         }
     </div>
 </div>
+@if (session.Boss && TR.Any())
+{
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <br />
+            <br />
+            @if (TR.Any())
+            {
+                <h3 class="text-center">Pending Team Requests</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Type</th>
+                            <th>Project</th>
+                            <th>Request From</th>
+                            <th>Created Date</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in TR)
+                        {
+                            <tr>
+                                <td>@request.strUserName</td>
+                                <td>@request.Type</td>
+                                <td>@request.strProjectName</td>
+                                <td>@request.strRequestFrom</td>
+                                <td>@request.dteCreated.ToString("yyyy-MM-dd")</td>
+                                <td>@request.strFrom</td>
+                                <td>@request.strTo</td>
+                                <button class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        @onclick="() => GetRequestID(request.intID)"
+                                        data-bs-target="#actionModal">
+                                    Action
+                                </button>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
 
 
 <div class="modal fade fade-in-modal" id="AddTask" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
@@ -186,7 +236,26 @@
         </div>
     </div>
 </div>
-
+<div class="modal fade fade-in-modal" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="actionModalLabel">Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="btn-group d-flex" role="group">
+                    <button class="btn btn-success flex-fill" data-bs-dismiss="modal" @onclick="() => RequestAction(1)">
+                        <i class="bi bi-check-circle me-2"></i> Approve
+                    </button>
+                    <button class="btn btn-danger flex-fill" data-bs-dismiss="modal" @onclick="() => RequestAction(2)">
+                        <i class="bi bi-x-circle me-2"></i> Reject
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @code
 {
     public SessionServices session = new SessionServices();
@@ -198,6 +267,7 @@
     public TimeOnly EndTime { get; set; } = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute);
     public List<Request> PR = new List<Request>();
     public List<Request> TR = new List<Request>();
+    int RequestID;
     public TimeSpan TimeStamp
     {
         get
@@ -228,6 +298,7 @@
         {
             await Tost.Error("Error", output, true);
         }
+        newTask = new TaskCreate();
         load();
     }
     public async void CreateTask()
@@ -248,6 +319,27 @@
         newTask = new TaskCreate();
         StateHasChanged();
     }
+    public async void RequestAction(int Action)
+    {
+        string output = await project.RequestAction(RequestID, session.UserID, Action);
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+        RequestID = 0;
+        load();
+        StateHasChanged();
+    }
+    public async void GetRequestID(int ReqID)
+    {
+        RequestID = ReqID;
+        StateHasChanged();
+    }
+
     public async void load()
     {
         ppu = await task.GetProjectByUser(session.UserID,0);
@@ -255,10 +347,6 @@
         if (session.Boss)
         {
             TR = await task.GetRequest(session.UserID, session.Boss);
-        }
-        if (session.Boss)
-        {
-            TR = await task.GetRequest(session.UserID, true);
         }
         StateHasChanged();
     }
