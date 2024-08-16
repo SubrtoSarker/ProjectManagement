@@ -162,5 +162,35 @@ namespace ProjectManagement.Services.TaskM
                 return null;
             }
         }
+        public async Task<string> Request(string TaskName, string Description, string RequestFrom, int USerID, int Project, DateTime Date, int Status, TimeSpan tm, string From, string To)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<string>($"api/Task/Request?TaskName={TaskName}&Description={Description}&RequestFrom={RequestFrom}&USerID={USerID}&Project={Project}&Date={Date}&Status={Status}&tm={tm}&From={From}&To={To}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
+        public async Task<List<Request>> GetRequest(int User, Boolean isSuperviser)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<List<Request>>($"api/Task/GetRequestList?User={User}&isSuperviser={isSuperviser}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

@@ -35,7 +35,13 @@
                                         @onclick="() => GetProjectID(item.intProjectID)"
                                         data-bs-toggle="modal"
                                         data-bs-target="#AddTask">
-                                        <i class="bi bi-plus"></i>
+                                        <i class="bi bi-plus-circle"></i>
+                                    </button>
+                                    <button class="btn btn-primary btn-sm"
+                                            @onclick="() => InitlizeTime(item.intProjectID)"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#AddRequest">
+                                        <i class="bi bi-envelope-plus"></i>
                                     </button>
                                 </h5>
                             </div>
@@ -52,6 +58,52 @@
         }
     </div>
 </div>
+
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        @if (PR.Any())
+        {
+            <h3 class="text-center">Pending Requests</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Project</th>
+                        <th>Task</th>
+                        <th>Description</th>
+                        <th>Request From</th>
+                        <th>Created Date</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Working Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in PR)
+                    {
+                        <tr>
+                            <td>@request.Type</td>
+                            <td>@request.strProjectName</td>
+                            <td>@request.strTaskName</td>
+                            <td>@request.strDescription</td>
+                            <td>@request.strRequestFrom</td>
+                            <td>@request.dteCreated.ToString("yyyy-MM-dd")</td>
+                            <td>@request.strFrom</td>
+                            <td>@request.strTo</td>
+                            <td>@request.tmWorking</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <h3 class="text-center">No Pending Requests</h3>
+        }
+    </div>
+</div>
+
+
 <div class="modal fade fade-in-modal" id="AddTask" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -81,16 +133,102 @@
     </div>
 </div>
 
+<div class="modal fade fade-in-modal" id="AddRequest" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Add New Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@newTask" OnValidSubmit="Request" class="needs-validation" novalidate>
+                    <DataAnnotationsValidator />
+                    <div class="row mb-3">
+                        <div class="col-md-2">
+                            <label for="Type" class="form-label mt-2">Type</label>
+                        </div>
+                        <div class="col-md-10">
+                            <select class="form-select mt-1" id="Type" @bind="Type">
+                                <option value="7">Meeting</option>
+                                <option value="8">Emergency Support</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <FloatingText id="Name" type="text" class="form-control" @bind-Value="newTask.strTaskName" Label="Name" />
+                        <ValidationMessage class="text-danger" For="@(() => newTask.strTaskName)" />
+                    </div>
+                    <div class="row">
+                        <FloatingText id="Desc" type="text" class="form-control" @bind-Value="newTask.strDescription" Label="Description" />
+                        <ValidationMessage class="text-danger" For="@(() => newTask.strDescription)" />
+                    </div>
+                    <div class="row">
+                        <FloatingText id="Req" type="text" class="form-control" @bind-Value="newTask.strRequestFrom" Label="Request From" />
+                        <ValidationMessage class="text-danger" For="@(() => newTask.strRequestFrom)" />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="StartTime" class="form-label">Start Time</label>
+                            <input type="time" class="form-control" id="StartTime" @bind="StartTime" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="EndTime" class="form-label">End Time</label>
+                            <input type="time" class="form-control" id="EndTime" @bind="EndTime" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Spend Time </label>
+                            <label class="form-label">@TimeStamp</label>
+                        </div>
+                    </div>
+                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary mt-2">ADD</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
 @code
 {
     public SessionServices session = new SessionServices();
     public List<ProjectPerUser> ppu = new List<ProjectPerUser>();
     private TaskCreate newTask = new TaskCreate();
     public int ProjectID;
+    private int Type = 7;
+    public TimeOnly StartTime { get; set; } = new TimeOnly(DateTime.Now.AddHours(-1).Hour, DateTime.Now.Minute);
+    public TimeOnly EndTime { get; set; } = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute);
+    public List<Request> PR = new List<Request>();
+    public List<Request> TR = new List<Request>();
+    public TimeSpan TimeStamp
+    {
+        get
+        {
+            return EndTime-StartTime;
+        }
+    }
     public async void GetProjectID(int Project)
     {
         ProjectID = Project;
         StateHasChanged();
+    }
+    public async void InitlizeTime(int Project)
+    {
+        ProjectID = Project;
+        StartTime = new TimeOnly(DateTime.Now.AddHours(-1).Hour, DateTime.Now.Minute);
+        EndTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute);
+        StateHasChanged();
+    }
+    public async void Request()
+    {
+        string output = await task.Request(newTask.strTaskName, newTask.strDescription, newTask.strRequestFrom, session.UserID, ProjectID, DateTime.Now, Type, TimeStamp, StartTime.ToString(), EndTime.ToString());
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+        load();
     }
     public async void CreateTask()
     {
@@ -113,6 +251,15 @@
     public async void load()
     {
         ppu = await task.GetProjectByUser(session.UserID,0);
+        PR = await task.GetRequest(session.UserID, false);
+        if (session.Boss)
+        {
+            TR = await task.GetRequest(session.UserID, session.Boss);
+        }
+        if (session.Boss)
+        {
+            TR = await task.GetRequest(session.UserID, true);
+        }
         StateHasChanged();
     }
     protected override async Task OnInitializedAsync()
