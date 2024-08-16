@@ -8,7 +8,7 @@
 @inject Blazored.SessionStorage.ISessionStorageService sess
 @inject ITaskServices task
 @inject IJSRuntime JSRuntime
-@inject ToastService Tost
+@inject ToastService Toast
 @inject IProjectService project
 <PageTitle>Index</PageTitle>
 
@@ -219,11 +219,11 @@
                     <div class="row">
                         <div class="col-md-4">
                             <label for="StartTime" class="form-label">Start Time</label>
-                            <input type="time" class="form-control" id="StartTime" @bind="StartTime" />
+                            <input type="time" class="form-control" id="StartTime" @oninput="ValidateStartTime" @bind="StartTime" />
                         </div>
                         <div class="col-md-4">
                             <label for="EndTime" class="form-label">End Time</label>
-                            <input type="time" class="form-control" id="EndTime" @bind="EndTime" />
+                            <input type="time" class="form-control" id="EndTime" @oninput="ValidateEndTime" @bind="EndTime" />
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Spend Time </label>
@@ -263,18 +263,34 @@
     private TaskCreate newTask = new TaskCreate();
     public int ProjectID;
     private int Type = 7;
-    public TimeOnly StartTime { get; set; } = new TimeOnly(DateTime.Now.AddHours(-1).Hour, DateTime.Now.Minute);
-    public TimeOnly EndTime { get; set; } = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute);
     public List<Request> PR = new List<Request>();
     public List<Request> TR = new List<Request>();
     int RequestID;
-    public TimeSpan TimeStamp
+    private TimeOnly StartTime { get; set; } = new TimeOnly(DateTime.Now.AddHours(-1).Hour, DateTime.Now.Minute);
+    private TimeOnly EndTime { get; set; } = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute);
+
+    private TimeSpan TimeStamp => EndTime - StartTime;
+    public async void ValidateStartTime(ChangeEventArgs e)
     {
-        get
+        var newStartTime = TimeOnly.Parse(e.Value.ToString());
+        if (newStartTime > EndTime)
         {
-            return EndTime-StartTime;
+            StartTime = EndTime.AddHours(-1);
+            StateHasChanged();
+            await Toast.Warning("Warning", "Invalid Start Time", true);
         }
     }
+    public async void ValidateEndTime(ChangeEventArgs e)
+    {
+        var newEndTime = TimeOnly.Parse(e.Value.ToString());
+        if (StartTime > newEndTime)
+        {
+            EndTime = StartTime.AddHours(1);
+            StateHasChanged();
+            await Toast.Warning("Warning", "Invalid End Time", true);
+        }
+    }
+
     public async void GetProjectID(int Project)
     {
         ProjectID = Project;
@@ -289,17 +305,24 @@
     }
     public async void Request()
     {
-        string output = await task.Request(newTask.strTaskName, newTask.strDescription, newTask.strRequestFrom, session.UserID, ProjectID, DateTime.Now, Type, TimeStamp, StartTime.ToString(), EndTime.ToString());
-        if (output.Contains("Success"))
+        if (StartTime < EndTime)
         {
-            await Tost.Success("Success", output, true);
+            string output = await task.Request(newTask.strTaskName, newTask.strDescription, newTask.strRequestFrom, session.UserID, ProjectID, DateTime.Now, Type, TimeStamp, StartTime.ToString(), EndTime.ToString());
+            if (output.Contains("Success"))
+            {
+                await Toast.Success("Success", output, true);
+            }
+            else
+            {
+                await Toast.Error("Error", output, true);
+            }
+            newTask = new TaskCreate();
+            load();
         }
         else
         {
-            await Tost.Error("Error", output, true);
+            await Toast.Error("Error", "Invalid Selected Time", true);
         }
-        newTask = new TaskCreate();
-        load();
     }
     public async void CreateTask()
     {
@@ -309,11 +332,11 @@
         string output = await task.CreateTask(Name, Desc, ReqFrom, session.UserID, ProjectID);
         if (output.Contains("Success"))
         {
-            await Tost.Success("Success", output, true);
+            await Toast.Success("Success", output, true);
         }
         else
         {
-            await Tost.Error("Error", output, true);
+            await Toast.Error("Error", output, true);
         }
         load();
         newTask = new TaskCreate();
@@ -324,11 +347,11 @@
         string output = await project.RequestAction(RequestID, session.UserID, Action);
         if (output.Contains("Success"))
         {
-            await Tost.Success("Success", output, true);
+            await Toast.Success("Success", output, true);
         }
         else
         {
-            await Tost.Error("Error", output, true);
+            await Toast.Error("Error", output, true);
         }
         RequestID = 0;
         load();
