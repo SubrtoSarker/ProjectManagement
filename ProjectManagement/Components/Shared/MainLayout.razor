@@ -14,11 +14,11 @@
             <div class="flex-fill d-sm-none">
             </div>
             <Widget></Widget>
-            <Logout ImageUrl="images/Argo-C.png" DisplayName="@DisplayName" UserName="@DisplayAccount">
+            <Logout ImageUrl="image/default.jpg" DisplayName="@DisplayName" UserName="@DisplayAccount">
                 <LinkTemplate>
-                    <a href="#"><i class="fa-solid fa-suitcase"></i>Personal Center</a>
-                    <a href="#"><i class="fa-solid fa-cog"></i>Set Up</a>
-                    <a href="#"><i class="fa-solid fa-bell"></i>Notify<span class="badge badge-pill badge-success"></span></a>
+                    @* <a href="#"><i class="fa-solid fa-suitcase"></i>Personal Center</a> *@
+                    @* <a href="#"><i class="fa-solid fa-cog"></i>Set Up</a> *@
+                    @* <a href="#"><i class="fa-solid fa-bell"></i>Notify<span class="badge badge-pill badge-success"></span></a> *@
                     <a onclick="@Logout"><i class="fa-solid fa-key"></i>Logout</a>
                 </LinkTemplate>
             </Logout>
@@ -168,7 +168,7 @@
             {
                 DisplayAccount = "User";
             }
-            if (savedSession.UserID==2)
+            if (savedSession.Email == "subrato@akijbashir.com" && Admin)
             {
                 DisplayAccount = "All";
             }
