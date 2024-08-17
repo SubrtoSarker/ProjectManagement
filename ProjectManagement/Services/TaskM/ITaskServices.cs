@@ -16,5 +16,6 @@ namespace ProjectManagement.Services.TaskM
         Task<string> Request(string TaskName, string Description, string RequestFrom, int USerID, int Project, DateTime Date, int Status, TimeSpan tm, string From, string To);
         Task<List<Request>> GetRequest(int User, Boolean isSuperviser);
         Task<List<Notify>> GetNotify(int User);
+        Task<List<PendingTask>> GetPendingTasks(int Enroll);
     }
 }

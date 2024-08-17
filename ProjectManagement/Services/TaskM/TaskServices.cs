@@ -197,7 +197,22 @@ namespace ProjectManagement.Services.TaskM
             try
             {
                 await SetAuthorizationHeader();
-                var result = await _httpClient.GetFromJsonAsync<List<Notify>>($"api/Task/GetNotify?Enroll=2");
+                var result = await _httpClient.GetFromJsonAsync<List<Notify>>($"api/Task/GetNotify?Enroll={User}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
+        public async Task<List<PendingTask>> GetPendingTasks(int Enroll)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<List<PendingTask>>($"api/Task/GetPendingTasks?Enroll={Enroll}");
                 return result;
             }
             catch (Exception ex)
