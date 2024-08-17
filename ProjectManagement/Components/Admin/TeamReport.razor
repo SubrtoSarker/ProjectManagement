@@ -1,28 +1,292 @@
 ﻿@page "/TeamReport"
 @attribute [TabItemOption(Text = "Team Report")]
+@using ClosedXML.Excel
 @using Models.Admin;
+@using ProjectManagement.Models.AddistionalModels
 @using ProjectManagement.Models.ProjectModel
+@using ProjectManagement.Models.Task
 @using ProjectManagement.Services.Session
+@using ProjectManagement.Services.TaskM
 @using Services.Admin;
+@using System.Text.Json
 @inject IAdminServices admin;
 @inject IJSRuntime JSRuntime
 @inject ToastService Tost
 @inject Blazored.SessionStorage.ISessionStorageService sess
+@inject ITaskServices task
 <PageTitle>Team Report</PageTitle>
+<PageTitle>My Progress Report</PageTitle>
 
+<h3>Team Progress Report</h3>
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <label for="project" class="form-label">Project:</label>
+        <select id="project" class="form-select" @bind="selectedProject">
+            @foreach (var i in projects)
+            {
+                <option value="@i.intProjectID">@i.strProjectName</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3 mb-3">
+        <label for="reportType" class="form-label">Report Type:</label>
+        <select id="reportType" class="form-select" @onchange="OnReportTypeChanged">
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly">Monthly</option>
+            <option value="Custom">Custom</option>
+        </select>
+    </div>
+
+    @if (selectedReportType == "Daily")
+    {
+        <div class="col-md-3 mb-3">
+            <label for="dailyDate" class="form-label">Select Date:</label>
+            <input type="date" id="dailyDate" class="form-control" @bind="customDate" />
+        </div>
+    }
+    else if (selectedReportType == "Weekly")
+    {
+        <div class="col-md-3 mb-3">
+            <label for="weeklyDate" class="form-label">Select Week:</label>
+            <select id="weeklyDate" class="form-select" @bind="selectedDate">
+                @foreach (var week in Week)
+                {
+                    <option value="@week.Value">@week.Text</option>
+                }
+            </select>
+        </div>
+    }
+    else if (selectedReportType == "Monthly")
+    {
+        <div class="col-md-3 mb-3">
+            <label for="monthlyDate" class="form-label">Select Month:</label>
+            <select id="monthlyDate" class="form-select" @bind="selectedDate">
+                @foreach (var month in Month)
+                {
+                    <option value="@month.Value">@month.Text</option>
+                }
+            </select>
+        </div>
+    }
+    else if (selectedReportType == "Custom")
+    {
+        <div class="col-md-2 mb-3">
+            <label for="startDate" class="form-label">Start Date:</label>
+            <input type="date" id="startDate" class="form-control" @bind="customStartDate" />
+        </div>
+        <div class="col-md-2 mb-3">
+            <label for="endDate" class="form-label">End Date:</label>
+            <input type="date" id="endDate" class="form-control" @bind="customEndDate" />
+        </div>
+    }
+
+    <div class="col-md-2 mb-3 align-self-end">
+        <button class="btn btn-primary" @onclick="SubmitReport">Show</button>
+    </div>
+</div>
 @code {
     public SessionServices session = new SessionServices();
     public List<DateWiseReport> Team = new List<DateWiseReport>();
-    protected override async Task OnInitializedAsync()
-    {
-        session = await sess.GetItemAsync<SessionServices>("session");
-        Load();
-    }
     public async void Load()
     {
         DateTime From = DateTime.Now.AddYears(-1);
         DateTime TO = DateTime.Now;
         Team = await admin.GetTeamReport(session.UserID, From, TO);
         StateHasChanged();
+    }
+    private int selectedProject;
+    private string selectedReportType = "Daily";
+    private string selectedDate;
+    private DateTime customStartDate;
+    private DateTime customEndDate;
+    private DateTime customDate;
+    private List<ValueText> Week = new List<ValueText>();
+    private List<ValueText> Month = new List<ValueText>();
+    private List<Performance> Performance = new List<Performance>();
+    private DateTime From;
+    private DateTime To;
+    private List<ProjectPerUser> projects = new List<ProjectPerUser>();
+    protected override async Task OnInitializedAsync()
+    {
+        session = await sess.GetItemAsync<SessionServices>("session");
+        projects = await task.GetProjectByUser(session.UserID, 1);
+        Load();
+        GenerateDates();
+        SetDefaultSelectedDate();
+        customEndDate = DateTime.Today;
+        customDate = DateTime.Today;
+        customStartDate = customEndDate.AddDays(-7);
+    }
+
+    private void GenerateDates()
+    {
+        var today = DateTime.Today;
+
+        // Generate weekly dates (current week to last 7 weeks)
+        Week.Clear();
+        for (int i = 0; i < 20; i++)
+        {
+            var startOfWeek = today.AddDays(-(int)today.DayOfWeek - (7 * i));
+            var endOfWeek = startOfWeek.AddDays(6);
+
+            // Format value and text as per the requirement
+            Week.Add(new ValueText
+                {
+                    Value = $"{startOfWeek:yyyy-MM-dd} [] {endOfWeek:yyyy-MM-dd}",
+                    Text = $"{startOfWeek:MMMM d} to {endOfWeek:MMMM d}"
+                });
+        }
+
+        // Generate monthly dates (current month to last 12 months)
+        Month.Clear();
+        for (int i = 0; i < 12; i++)
+        {
+            var month = today.AddMonths(-i);
+            var startOfMonth = new DateTime(month.Year, month.Month, 1);
+            var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+            Month.Add(new ValueText
+                {
+                    Value = $"{startOfMonth:yyyy-MM-dd} [] {endOfMonth:yyyy-MM-dd}",
+                    Text = month.ToString("MMMM yyyy")
+                });
+        }
+    }
+
+    private void SetDefaultSelectedDate()
+    {
+        if (selectedReportType == "Weekly" && Week.Count > 0)
+        {
+            selectedDate = Week[0].Value;
+        }
+        else if (selectedReportType == "Monthly" && Month.Count > 0)
+        {
+            selectedDate = Month[0].Value;
+        }
+    }
+    private void OnReportTypeChanged(ChangeEventArgs e)
+    {
+        selectedReportType = e.Value.ToString();
+        SetDefaultSelectedDate();
+        StateHasChanged(); // Ensure UI updates correctly
+    }
+    private async Task SubmitReport()
+    {
+        try
+        {
+            if (selectedReportType == "Custom" && (customStartDate == DateTime.MinValue || customEndDate == DateTime.MinValue))
+            {
+                await Tost.Warning("Please select valid start and end dates for the custom report.");
+                return;
+            }
+
+            if (selectedReportType == "Daily")
+            {
+                From = customDate;
+                To = customDate;
+            }
+            else if (selectedReportType == "Weekly" || selectedReportType == "Monthly")
+            {
+                string date = selectedDate;
+                string[] dates = date.Split(new string[] { " [] " }, StringSplitOptions.None);
+                From = Convert.ToDateTime(dates[0].ToString());
+                To = Convert.ToDateTime(dates[1].ToString());
+            }
+            else if (selectedReportType == "Custom")
+            {
+                From = customStartDate;
+                To = customEndDate;
+            }
+            else
+            {
+                From = DateTime.Now;
+                To = DateTime.Now;
+            }
+            Performance = await task.GetPerFormance(From, To, session.UserID, selectedProject);
+            await ShowDonutChart();
+
+        }
+        catch (Exception ex)
+        {
+            await Tost.Error(ex.Message);
+        }
+
+    }
+    private async Task ShowDonutChart()
+    {
+        var jsonData = JsonSerializer.Serialize(Performance);
+        await JSRuntime.InvokeVoidAsync("createDonutChart", jsonData);
+    }
+    private async Task PrintChartDiv()
+    {
+        await JSRuntime.InvokeVoidAsync("printDiv", "chartdiv");
+    }
+    private async Task ExportToExcel()
+    {
+        try
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Performance Data");
+
+                // Add a title to the report
+                worksheet.Cell(1, 1).Value = "Performance Summary Report";
+                worksheet.Cell(1, 1).Style.Font.Bold = true;
+                worksheet.Cell(1, 1).Style.Font.FontSize = 16;
+                worksheet.Range(1, 1, 1, 8).Merge(); // Merge cells A1 to H1
+                worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                //worksheet.Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
+
+                // Add headers starting from the second row
+                var headerRange = worksheet.Range(2, 1, 2, 8);
+                headerRange.Style.Font.Bold = true;
+                //headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                //headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                worksheet.Cell(2, 1).Value = "Count"; // Row number column
+                worksheet.Cell(2, 2).Value = "From";
+                worksheet.Cell(2, 3).Value = "To";
+                worksheet.Cell(2, 4).Value = "Task Name";
+                worksheet.Cell(2, 5).Value = "Description";
+                worksheet.Cell(2, 6).Value = "Request From";
+                worksheet.Cell(2, 7).Value = "Project Name";
+                worksheet.Cell(2, 8).Value = "Working Time";
+
+                // Add data starting from the third row
+                for (int i = 0; i < Performance.Count; i++)
+                {
+                    worksheet.Cell(i + 3, 1).Value = (i + 1); // Row number
+                    worksheet.Cell(i + 3, 2).Value = From.ToString("dd-MM-yyyy");
+                    worksheet.Cell(i + 3, 3).Value = To.ToString("dd-MM-yyyy");
+                    worksheet.Cell(i + 3, 4).Value = Performance[i].strTaskName;
+                    worksheet.Cell(i + 3, 5).Value = Performance[i].strDescription;
+                    worksheet.Cell(i + 3, 6).Value = Performance[i].strRequestFrom;
+                    worksheet.Cell(i + 3, 7).Value = Performance[i].strProjectName;
+                    worksheet.Cell(i + 3, 8).Value = Performance[i].tmWorking.ToString();
+                }
+
+                // Create a table from the data range without filters
+                var dataRange = worksheet.Range(2, 1, Performance.Count + 2, 8);
+                var table = dataRange.CreateTable();
+                table.ShowAutoFilter = false; // Disable filtering
+
+                // Auto-fit columns
+                worksheet.Columns().AdjustToContents();
+
+                // Convert the workbook to a byte array
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var fileContents = stream.ToArray();
+                    var fileName = $"PerformanceReport.xlsx";
+                    await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(fileContents));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await Tost.Error(ex.Message);
+        }
+
     }
 }

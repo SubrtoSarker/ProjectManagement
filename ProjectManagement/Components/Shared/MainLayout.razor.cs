@@ -42,6 +42,7 @@ namespace ProjectManagement.Components.Shared
                 new() { Text = "Tasks", Icon = "fa-solid fa-fw fa-tasks", Url = "/Task" },
                 new() { Text = "Progress Report", Icon = "fa-solid fa-fw fa-chart-line", Url = "/TaskReport" },
                 new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" },
+                new() { Text = "Team Progress Report", Icon = "fa-solid fa-chart-area", Url = "/TeamReport" },
                 new() { Text = "Users", Icon = "fa-solid fa-fw fa-users-cog", Url = "/User" },
 
                 new() { Text = "Test", Icon = "fa-solid fa-vial", Url = "/Test" },
@@ -67,6 +68,7 @@ namespace ProjectManagement.Components.Shared
                 menus.AddRange(new List<MenuItem>
                 {
                     new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" },
+                    new() { Text = "Team Progress Report", Icon = "fa-solid fa-chart-area", Url = "/TeamReport" },
                     new() { Text = "Users", Icon = "fa-solid fa-fw fa-users-cog", Url = "/User" },
 
                     new() { Text = "Test", Icon = "fa-solid fa-vial", Url = "/Test" },
@@ -88,6 +90,7 @@ namespace ProjectManagement.Components.Shared
                 menus.AddRange(new List<MenuItem>
                 {
                     new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" },
+                    new() { Text = "Team Progress Report", Icon = "fa-solid fa-chart-area", Url = "/TeamReport" }
                 });
             }
             if (displayAccount == "User")
