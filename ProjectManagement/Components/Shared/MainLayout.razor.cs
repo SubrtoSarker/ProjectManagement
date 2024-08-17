@@ -89,8 +89,7 @@ namespace ProjectManagement.Components.Shared
             {
                 menus.AddRange(new List<MenuItem>
                 {
-                    new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" },
-                    new() { Text = "Team Progress Report", Icon = "fa-solid fa-chart-area", Url = "/TeamReport" }
+                    new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" }
                 });
             }
             if (displayAccount == "User")

@@ -85,6 +85,13 @@
         <button class="btn btn-primary" @onclick="SubmitReport">Show</button>
     </div>
 </div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12" style="overflow-x: auto;">
+            <div id="chartdiv" style="width: 100%; height: 500px; position: relative;"></div>
+        </div>
+    </div>
+</div>
 @code {
     public SessionServices session = new SessionServices();
     public List<DateWiseReport> Team = new List<DateWiseReport>();
@@ -110,7 +117,7 @@
     {
         session = await sess.GetItemAsync<SessionServices>("session");
         projects = await task.GetProjectByUser(session.UserID, 1);
-        Load();
+        //Load();
         GenerateDates();
         SetDefaultSelectedDate();
         customEndDate = DateTime.Today;
@@ -202,7 +209,7 @@
                 To = DateTime.Now;
             }
             Team = await admin.GetTeamReport(session.UserID, From, To);
-            await ShowDonutChart();
+            await ShowLineChart();
 
         }
         catch (Exception ex)
@@ -211,10 +218,10 @@
         }
 
     }
-    private async Task ShowDonutChart()
+    private async Task ShowLineChart()
     {
         var jsonData = JsonSerializer.Serialize(Team);
-        await JSRuntime.InvokeVoidAsync("createDonutChart", jsonData);
+        await JSRuntime.InvokeVoidAsync("createLineChart", jsonData);
     }
     // private async Task ExportToExcel()
     // {
