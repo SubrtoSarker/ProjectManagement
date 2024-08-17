@@ -1,0 +1,28 @@
+﻿@page "/TeamReport"
+@attribute [TabItemOption(Text = "Team Report")]
+@using Models.Admin;
+@using ProjectManagement.Models.ProjectModel
+@using ProjectManagement.Services.Session
+@using Services.Admin;
+@inject IAdminServices admin;
+@inject IJSRuntime JSRuntime
+@inject ToastService Tost
+@inject Blazored.SessionStorage.ISessionStorageService sess
+<PageTitle>Team Report</PageTitle>
+
+@code {
+    public SessionServices session = new SessionServices();
+    public List<DateWiseReport> Team = new List<DateWiseReport>();
+    protected override async Task OnInitializedAsync()
+    {
+        session = await sess.GetItemAsync<SessionServices>("session");
+        Load();
+    }
+    public async void Load()
+    {
+        DateTime From = DateTime.Now.AddYears(-1);
+        DateTime TO = DateTime.Now;
+        Team = await admin.GetTeamReport(session.UserID, From, TO);
+        StateHasChanged();
+    }
+}

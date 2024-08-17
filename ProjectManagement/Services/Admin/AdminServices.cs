@@ -84,5 +84,20 @@ namespace ProjectManagement.Services.Admin
                 return null;
             }
         }
+        public async Task<List<DateWiseReport>> GetTeamReport(int Enroll, DateTime From, DateTime To)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<List<DateWiseReport>>($"api/Admin/GetTeamReport?Enroll={Enroll}&From={From}&To={To}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
     }
 }
