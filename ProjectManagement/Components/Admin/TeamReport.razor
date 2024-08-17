@@ -103,7 +103,6 @@
     private DateTime customDate;
     private List<ValueText> Week = new List<ValueText>();
     private List<ValueText> Month = new List<ValueText>();
-    private List<Performance> Performance = new List<Performance>();
     private DateTime From;
     private DateTime To;
     private List<ProjectPerUser> projects = new List<ProjectPerUser>();
@@ -202,7 +201,7 @@
                 From = DateTime.Now;
                 To = DateTime.Now;
             }
-            Performance = await task.GetPerFormance(From, To, session.UserID, selectedProject);
+            Team = await admin.GetTeamReport(session.UserID, From, To);
             await ShowDonutChart();
 
         }
@@ -214,79 +213,75 @@
     }
     private async Task ShowDonutChart()
     {
-        var jsonData = JsonSerializer.Serialize(Performance);
+        var jsonData = JsonSerializer.Serialize(Team);
         await JSRuntime.InvokeVoidAsync("createDonutChart", jsonData);
     }
-    private async Task PrintChartDiv()
-    {
-        await JSRuntime.InvokeVoidAsync("printDiv", "chartdiv");
-    }
-    private async Task ExportToExcel()
-    {
-        try
-        {
-            using (var workbook = new XLWorkbook())
-            {
-                var worksheet = workbook.Worksheets.Add("Performance Data");
+    // private async Task ExportToExcel()
+    // {
+    //     try
+    //     {
+    //         using (var workbook = new XLWorkbook())
+    //         {
+    //             var worksheet = workbook.Worksheets.Add("Performance Data");
 
-                // Add a title to the report
-                worksheet.Cell(1, 1).Value = "Performance Summary Report";
-                worksheet.Cell(1, 1).Style.Font.Bold = true;
-                worksheet.Cell(1, 1).Style.Font.FontSize = 16;
-                worksheet.Range(1, 1, 1, 8).Merge(); // Merge cells A1 to H1
-                worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                //worksheet.Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
+    //             // Add a title to the report
+    //             worksheet.Cell(1, 1).Value = "Performance Summary Report";
+    //             worksheet.Cell(1, 1).Style.Font.Bold = true;
+    //             worksheet.Cell(1, 1).Style.Font.FontSize = 16;
+    //             worksheet.Range(1, 1, 1, 8).Merge(); // Merge cells A1 to H1
+    //             worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+    //             //worksheet.Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
 
-                // Add headers starting from the second row
-                var headerRange = worksheet.Range(2, 1, 2, 8);
-                headerRange.Style.Font.Bold = true;
-                //headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                //headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+    //             // Add headers starting from the second row
+    //             var headerRange = worksheet.Range(2, 1, 2, 8);
+    //             headerRange.Style.Font.Bold = true;
+    //             //headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+    //             //headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
 
-                worksheet.Cell(2, 1).Value = "Count"; // Row number column
-                worksheet.Cell(2, 2).Value = "From";
-                worksheet.Cell(2, 3).Value = "To";
-                worksheet.Cell(2, 4).Value = "Task Name";
-                worksheet.Cell(2, 5).Value = "Description";
-                worksheet.Cell(2, 6).Value = "Request From";
-                worksheet.Cell(2, 7).Value = "Project Name";
-                worksheet.Cell(2, 8).Value = "Working Time";
+    //             worksheet.Cell(2, 1).Value = "Count"; // Row number column
+    //             worksheet.Cell(2, 2).Value = "From";
+    //             worksheet.Cell(2, 3).Value = "To";
+    //             worksheet.Cell(2, 4).Value = "Task Name";
+    //             worksheet.Cell(2, 5).Value = "Description";
+    //             worksheet.Cell(2, 6).Value = "Request From";
+    //             worksheet.Cell(2, 7).Value = "Project Name";
+    //             worksheet.Cell(2, 8).Value = "Working Time";
 
-                // Add data starting from the third row
-                for (int i = 0; i < Performance.Count; i++)
-                {
-                    worksheet.Cell(i + 3, 1).Value = (i + 1); // Row number
-                    worksheet.Cell(i + 3, 2).Value = From.ToString("dd-MM-yyyy");
-                    worksheet.Cell(i + 3, 3).Value = To.ToString("dd-MM-yyyy");
-                    worksheet.Cell(i + 3, 4).Value = Performance[i].strTaskName;
-                    worksheet.Cell(i + 3, 5).Value = Performance[i].strDescription;
-                    worksheet.Cell(i + 3, 6).Value = Performance[i].strRequestFrom;
-                    worksheet.Cell(i + 3, 7).Value = Performance[i].strProjectName;
-                    worksheet.Cell(i + 3, 8).Value = Performance[i].tmWorking.ToString();
-                }
+    //             // Add data starting from the third row
+    //             for (int i = 0; i < Performance.Count; i++)
+    //             {
+    //                 worksheet.Cell(i + 3, 1).Value = (i + 1); // Row number
+    //                 worksheet.Cell(i + 3, 2).Value = From.ToString("dd-MM-yyyy");
+    //                 worksheet.Cell(i + 3, 3).Value = To.ToString("dd-MM-yyyy");
+    //                 worksheet.Cell(i + 3, 4).Value = Performance[i].strTaskName;
+    //                 worksheet.Cell(i + 3, 5).Value = Performance[i].strDescription;
+    //                 worksheet.Cell(i + 3, 6).Value = Performance[i].strRequestFrom;
+    //                 worksheet.Cell(i + 3, 7).Value = Performance[i].strProjectName;
+    //                 worksheet.Cell(i + 3, 8).Value = Performance[i].tmWorking.ToString();
+    //             }
 
-                // Create a table from the data range without filters
-                var dataRange = worksheet.Range(2, 1, Performance.Count + 2, 8);
-                var table = dataRange.CreateTable();
-                table.ShowAutoFilter = false; // Disable filtering
+    //             // Create a table from the data range without filters
+    //             var dataRange = worksheet.Range(2, 1, Performance.Count + 2, 8);
+    //             var table = dataRange.CreateTable();
+    //             table.ShowAutoFilter = false; // Disable filtering
 
-                // Auto-fit columns
-                worksheet.Columns().AdjustToContents();
+    //             // Auto-fit columns
+    //             worksheet.Columns().AdjustToContents();
 
-                // Convert the workbook to a byte array
-                using (var stream = new MemoryStream())
-                {
-                    workbook.SaveAs(stream);
-                    var fileContents = stream.ToArray();
-                    var fileName = $"PerformanceReport.xlsx";
-                    await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(fileContents));
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            await Tost.Error(ex.Message);
-        }
+    //             // Convert the workbook to a byte array
+    //             using (var stream = new MemoryStream())
+    //             {
+    //                 workbook.SaveAs(stream);
+    //                 var fileContents = stream.ToArray();
+    //                 var fileName = $"PerformanceReport.xlsx";
+    //                 await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(fileContents));
+    //             }
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         await Tost.Error(ex.Message);
+    //     }
 
-    }
+    // }
 }
