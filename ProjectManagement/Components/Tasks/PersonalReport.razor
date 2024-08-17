@@ -88,6 +88,11 @@
     @* <button class="btn btn-secondary" @onclick="PrintChartDiv">Print</button> *@
     <button class="btn btn-primary" @onclick="ExportToExcel">Export to Excel</button>
 }
+@if (PendingTasks.Count > 0)
+{
+    @* <button class="btn btn-secondary" @onclick="PrintChartDiv">Print</button> *@
+    <button class="btn btn-primary ms-2" @onclick="Export">Pending Task</button>
+}
 
 <div class="container">
     <div class="row">
@@ -112,6 +117,7 @@
     private DateTime From;
     private DateTime To;
     private List<ProjectPerUser> projects = new List<ProjectPerUser>();
+    private List<PendingTask> PendingTasks = new List<PendingTask>();
     protected override async Task OnInitializedAsync()
     {
         session = await sess.GetItemAsync<SessionServices>("session");
@@ -183,7 +189,7 @@
                 await Tost.Warning("Please select valid start and end dates for the custom report.");
                 return;
             }
-            
+
             if (selectedReportType == "Daily")
             {
                 From = customDate;
@@ -206,6 +212,7 @@
                 From = DateTime.Now;
                 To = DateTime.Now;
             }
+            PendingTasks = await task.GetPendingTasks(session.UserID);
             Performance = await task.GetPerFormance(From, To, session.UserID, selectedProject);
             await ShowDonutChart();
 
@@ -292,5 +299,69 @@
             await Tost.Error(ex.Message);
         }
         
+    }
+    private async Task Export()
+    {
+        try
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Performance Data");
+
+                // Add a title to the report
+                worksheet.Cell(1, 1).Value = "Pending Task Report";
+                worksheet.Cell(1, 1).Style.Font.Bold = true;
+                worksheet.Cell(1, 1).Style.Font.FontSize = 16;
+                worksheet.Range(1, 1, 1, 6).Merge(); // Merge cells A1 to H1
+                worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                //worksheet.Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
+
+                // Add headers starting from the second row
+                var headerRange = worksheet.Range(2, 1, 2, 6);
+                headerRange.Style.Font.Bold = true;
+                //headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                //headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                worksheet.Cell(2, 1).Value = "Task ID"; 
+                worksheet.Cell(2, 2).Value = "Project Name";
+                worksheet.Cell(2, 3).Value = "Task Name";
+                worksheet.Cell(2, 4).Value = "Description";
+                worksheet.Cell(2, 5).Value = "Status";
+                worksheet.Cell(2, 6).Value = "Working Time";
+
+                // Add data starting from the third row
+                for (int i = 0; i < PendingTasks.Count; i++)
+                {
+                    worksheet.Cell(i + 3, 1).Value = PendingTasks[i].intTaskID;
+                    worksheet.Cell(i + 3, 2).Value = PendingTasks[i].strProjectName;
+                    worksheet.Cell(i + 3, 3).Value = PendingTasks[i].strTaskName;
+                    worksheet.Cell(i + 3, 4).Value = PendingTasks[i].strDescription;
+                    worksheet.Cell(i + 3, 5).Value = PendingTasks[i].strStatus;
+                    worksheet.Cell(i + 3, 6).Value = PendingTasks[i].tmWorking.ToString();
+                }
+
+                // Create a table from the data range without filters
+                var dataRange = worksheet.Range(2, 1, PendingTasks.Count + 2, 6);
+                var table = dataRange.CreateTable();
+                table.ShowAutoFilter = false; // Disable filtering
+
+                // Auto-fit columns
+                worksheet.Columns().AdjustToContents();
+
+                // Convert the workbook to a byte array
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var fileContents = stream.ToArray();
+                    var fileName = $"PendingTaskReport.xlsx";
+                    await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(fileContents));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await Tost.Error(ex.Message);
+        }
+
     }
 }
