@@ -250,5 +250,6 @@
     protected override async Task OnInitializedAsync()
     {
         session=await sess.GetItemAsync<SessionServices>("session");
+        proj = await project.GetProjectByTeam(session.TeamID, session.UserID);
     }
 }
