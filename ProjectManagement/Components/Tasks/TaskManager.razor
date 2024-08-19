@@ -148,6 +148,7 @@
                                 Transfer
                             </button>
                         }
+                        <button class="btn ms-2" style="background-color: #20c997; color: white;" @onclick="Sync"><i class="fas fa-sync-alt"></i> Sync </button>
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-between">
@@ -587,7 +588,7 @@
         {
             var now = DateTime.Now;
             elapsedTime = now - startTime;
-            if (elapsedTime.TotalMinutes >= 1)
+            if (elapsedTime.TotalMinutes >= 10)
             {
                 Sync();
             }
