@@ -587,8 +587,19 @@
         {
             var now = DateTime.Now;
             elapsedTime = now - startTime;
+            if (elapsedTime.TotalMinutes >= 1)
+            {
+                Sync();
+            }
             StateHasChanged(); // Notify Blazor to update the UI
         }
+    }
+    private async void Sync()
+    {
+        await TaskAction(0, Current.intTaskID, 0, 1, elapsedTime);
+        StopAndResetTimer();
+        StartTimer();
+        StateHasChanged();
     }
     private void StopAndResetTimer()
     {
