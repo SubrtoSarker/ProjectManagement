@@ -9,6 +9,7 @@
 @inject ITaskServices task
 @inject IJSRuntime JSRuntime
 @inject ToastService Tost
+@implements IDisposable
 <PageTitle>Task</PageTitle>
 
 <style>
@@ -622,6 +623,13 @@
         {
             load();
             StartTimer();
+        }
+    }
+    public void Dispose()
+    {
+        if (Current != null && Current.intTaskID > 0 && elapsedTime.TotalSeconds>0)
+        {
+            Sync();
         }
     }
 }
