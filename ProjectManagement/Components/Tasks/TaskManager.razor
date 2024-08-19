@@ -84,19 +84,24 @@
                         <ul class="list-group">
                             @foreach (var step in Steps)
                             {
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <label class="form-check-label" for="@($"checkbox-{step.intStepId}")">@step.strStep</label>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="@($"checkbox-{step.intStepId}")" checked="@step.isDone"  @onchange="() => UpdateStepSatatus(step.intStepId, step.isDone)" />
-                                        <label class="form-check-label" for="@($"checkbox-{step.intStepId}")">Done</label>
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <label class="form-check-label flex-grow-1" for="@($"checkbox-{step.intStepId}")">@step.strStep</label>
+
+                                        <div class="form-check form-switch me-3">
+                                            <input class="form-check-input" type="checkbox" id="@($"checkbox-{step.intStepId}")" checked="@step.isDone" @onchange="() => UpdateStepSatatus(step.intStepId, step.isDone)" />
+                                            <label class="form-check-label" for="@($"checkbox-{step.intStepId}")">Done</label>
+                                        </div>
+
+                                        <button class="btn btn-primary"
+                                                @onclick="() => SetStep(step.strStep, step.intStepId)"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#EditStep">
+                                            <i class="bi bi-pen"></i>
+                                        </button>
                                     </div>
-                                    <button class="btn btn-primary"
-                                            @onclick="() => SetStep(step.strStep,step.intStepId)"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#EditStep">
-                                        <i class="bi bi-pen"></i>
-                                    </button>
                                 </li>
+
                             }
                         </ul>
                     }
