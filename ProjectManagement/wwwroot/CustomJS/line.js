@@ -1,19 +1,12 @@
 ﻿let lineRoot; // Declare a global variable to store the root instance for the line chart
 
-function createLineChart(data) {
-    var chartData = JSON.parse(data);
-    // Check if there's an existing root and dispose of it
-    if (lineRoot) {
-        lineRoot.dispose();
-    }
-
-    // Ensure the document is ready
+function createLineChart() {
     am5.ready(function () {
 
         // Create root element
+        // https://www.amcharts.com/docs/v5/getting-started/#Root_element 
         var root = am5.Root.new("chartdiv");
 
-        // Create a custom theme
         const myTheme = am5.Theme.new(root);
 
         myTheme.rule("AxisLabel", ["minor"]).setAll({
@@ -29,12 +22,14 @@ function createLineChart(data) {
         });
 
         // Set themes
+        // https://www.amcharts.com/docs/v5/concepts/themes/
         root.setThemes([
             am5themes_Animated.new(root),
             myTheme
         ]);
 
         // Create chart
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/
         var chart = root.container.children.push(am5xy.XYChart.new(root, {
             panX: true,
             panY: true,
@@ -43,6 +38,7 @@ function createLineChart(data) {
             maxTooltipDistance: 0,
             pinchZoomX: true
         }));
+
 
         var date = new Date();
         date.setHours(0, 0, 0, 0);
@@ -65,7 +61,9 @@ function createLineChart(data) {
             return data;
         }
 
+
         // Create axes
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
         var xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
             maxDeviation: 0.2,
             baseInterval: {
@@ -82,7 +80,9 @@ function createLineChart(data) {
             renderer: am5xy.AxisRendererY.new(root, {})
         }));
 
+
         // Add series
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
         for (var i = 0; i < 10; i++) {
             var series = chart.series.push(am5xy.LineSeries.new(root, {
                 name: "Series " + i,
@@ -104,16 +104,21 @@ function createLineChart(data) {
             var data = generateDatas(100);
             series.data.setAll(data);
 
+            // Make stuff animate on load
+            // https://www.amcharts.com/docs/v5/concepts/animations/
             series.appear();
         }
 
+
         // Add cursor
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
         var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
             behavior: "none"
         }));
         cursor.lineY.set("visible", false);
 
-        // Add scrollbars
+        // Add scrollbar
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
         chart.set("scrollbarX", am5.Scrollbar.new(root, {
             orientation: "horizontal"
         }));
@@ -122,16 +127,20 @@ function createLineChart(data) {
             orientation: "vertical"
         }));
 
+
         // Add legend
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/legend-xy-series/
         var legend = chart.rightAxesContainer.children.push(am5.Legend.new(root, {
             width: 200,
             paddingLeft: 15,
             height: am5.percent(100)
         }));
 
-        // Handle legend item hover
+        // When legend item container is hovered, dim all the series except the hovered one
         legend.itemContainers.template.events.on("pointerover", function (e) {
             var itemContainer = e.target;
+
+            // As series list is data of a legend, dataContext is series
             var series = itemContainer.dataItem.dataContext;
 
             chart.series.each(function (chartSeries) {
@@ -145,10 +154,10 @@ function createLineChart(data) {
                         strokeWidth: 3
                     });
                 }
-            });
-        });
+            })
+        })
 
-        // Handle legend item unhover
+        // When legend item container is unhovered, make all series as they are
         legend.itemContainers.template.events.on("pointerout", function (e) {
             var itemContainer = e.target;
             var series = itemContainer.dataItem.dataContext;
@@ -160,7 +169,7 @@ function createLineChart(data) {
                     stroke: chartSeries.get("fill")
                 });
             });
-        });
+        })
 
         legend.itemContainers.template.set("width", am5.p100);
         legend.valueLabels.template.setAll({
@@ -168,11 +177,13 @@ function createLineChart(data) {
             textAlign: "right"
         });
 
+        // It's is important to set legend data after all the events are set on template, otherwise events won't be copied
         legend.data.setAll(chart.series.values);
 
-        // Make chart animate on load
+
+        // Make stuff animate on load
+        // https://www.amcharts.com/docs/v5/concepts/animations/
         chart.appear(1000, 100);
 
     }); // end am5.ready()
-s
 }
