@@ -1,8 +1,7 @@
-﻿let lineRoot; // Declare a global variable to store the root instance for the line chart
-
+﻿
 function createLineChart() {
     am5.ready(function () {
-
+        
         // Create root element
         // https://www.amcharts.com/docs/v5/getting-started/#Root_element 
         var root = am5.Root.new("chartdiv");
@@ -60,7 +59,6 @@ function createLineChart() {
             }
             return data;
         }
-
 
         // Create axes
         // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
@@ -184,6 +182,7 @@ function createLineChart() {
         // Make stuff animate on load
         // https://www.amcharts.com/docs/v5/concepts/animations/
         chart.appear(1000, 100);
+        alert("Hi2");
 
     }); // end am5.ready()
 }
