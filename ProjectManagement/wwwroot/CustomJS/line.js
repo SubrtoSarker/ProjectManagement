@@ -1,10 +1,13 @@
-﻿
+﻿let root; // Declare a global variable to store the root instance
 function createLineChart() {
+    if (root) {
+        root.dispose();
+    }
     am5.ready(function () {
-        
+
         // Create root element
         // https://www.amcharts.com/docs/v5/getting-started/#Root_element 
-        var root = am5.Root.new("chartdiv");
+        root = am5.Root.new("chartdiv");
 
         const myTheme = am5.Theme.new(root);
 
@@ -175,7 +178,7 @@ function createLineChart() {
             textAlign: "right"
         });
 
-        // It's is important to set legend data after all the events are set on template, otherwise events won't be copied
+        // It's important to set legend data after all the events are set on template, otherwise events won't be copied
         legend.data.setAll(chart.series.values);
 
 
