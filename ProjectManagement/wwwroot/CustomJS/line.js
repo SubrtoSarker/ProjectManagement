@@ -53,6 +53,13 @@
             renderer: am5xy.AxisRendererY.new(root, {})
         }));
 
+        // Function to format minutes to hours and minutes
+        function formatTime(minutes) {
+            var hours = Math.floor(minutes / 60);
+            var mins = Math.round(minutes % 60);
+            return hours + "h " + mins + "m";
+        }
+
         // Create a series for each user
         for (var userName in groupedData) {
             if (groupedData.hasOwnProperty(userName)) {
@@ -64,7 +71,13 @@
                     valueXField: "dteInsertDate",
                     tooltip: am5.Tooltip.new(root, {
                         pointerOrientation: "horizontal",
-                        labelText: "{valueY} minutes"
+                        labelText: "{valueY}",
+                        adapter: {
+                            text: function (text, target) {
+                                var value = target.dataItem ? target.dataItem.valueY : 0;
+                                return formatTime(value);
+                            }
+                        }
                     })
                 }));
 
