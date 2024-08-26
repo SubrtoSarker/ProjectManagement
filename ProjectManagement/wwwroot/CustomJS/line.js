@@ -53,12 +53,20 @@
             renderer: am5xy.AxisRendererY.new(root, {})
         }));
 
-        // Function to format minutes to hours and minutes
-        function formatTime(minutes) {
-            var hours = Math.floor(minutes / 60);
-            var mins = Math.round(minutes % 60);
-            return hours + "h " + mins + "m";
-        }
+        // Create a number formatter for the Y-axis
+        var numberFormatter = am5.NumberFormatter.new(root, {
+            numberFormat: "#h 'h' #m 'm'"
+        });
+
+        // Set the number formatter to the Y-axis
+        yAxis.get("renderer").labels.template.set("adapter", {
+            text: function (text, target) {
+                var value = target.dataItem ? target.dataItem.value : 0;
+                var hours = Math.floor(value / 60);
+                var minutes = Math.round(value % 60);
+                return hours + "h " + minutes + "m";
+            }
+        });
 
         // Create a series for each user
         for (var userName in groupedData) {
@@ -75,7 +83,9 @@
                         adapter: {
                             text: function (text, target) {
                                 var value = target.dataItem ? target.dataItem.valueY : 0;
-                                return formatTime(value);
+                                var hours = Math.floor(value / 60);
+                                var minutes = Math.round(value % 60);
+                                return hours + "h " + minutes + "m";
                             }
                         }
                     })
