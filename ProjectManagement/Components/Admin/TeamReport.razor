@@ -221,7 +221,7 @@
     private async Task ShowLineChart()
     {
         var jsonData = JsonSerializer.Serialize(Team);
-        await JSRuntime.InvokeVoidAsync("createLineChart");
+        await JSRuntime.InvokeVoidAsync("createLineChart", jsonData);
     }
     // private async Task ExportToExcel()
     // {
