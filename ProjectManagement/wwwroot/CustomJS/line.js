@@ -12,9 +12,11 @@
         if (!groupedData[item.strUserName]) {
             groupedData[item.strUserName] = [];
         }
+        var timeParts = item.tmWorking.split(':');
+        var totalMinutes = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]) + parseInt(timeParts[2]) / 60;
         groupedData[item.strUserName].push({
             dteInsertDate: new Date(item.dteInsertDate).getTime(),
-            tmWorking: item.tmWorking.Hours * 60 + item.tmWorking.Minutes + item.tmWorking.Seconds / 60
+            tmWorking: totalMinutes
         });
     });
 
