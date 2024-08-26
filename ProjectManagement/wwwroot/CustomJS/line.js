@@ -1,4 +1,4 @@
-﻿let root; // Declare a global variable to store the root instance
+﻿
 function createLineChart() {
     if (root) {
         root.dispose();
