@@ -13,10 +13,13 @@
             groupedData[item.strUserName] = [];
         }
         var timeParts = item.tmWorking.split(':');
-        var totalMinutes = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]) + parseInt(timeParts[2]) / 60;
+
+        //var totalMinutes = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]) + parseInt(timeParts[2]) / 60;
+        var totalHour = parseInt(timeParts[0]);
+        var totalMinutes = parseInt(timeParts[1]);
         groupedData[item.strUserName].push({
             dteInsertDate: new Date(item.dteInsertDate).getTime(),
-            tmWorking: totalMinutes
+            tmWorking: parseFloat(totalHour + "." + totalMinutes.toString().padStart(2, '0')),
         });
     });
 
@@ -50,7 +53,16 @@
 
         // Create Y-axis (TimeSpan in minutes)
         var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-            renderer: am5xy.AxisRendererY.new(root, {})
+            renderer: am5xy.AxisRendererY.new(root, {}),
+            // Format Y-axis labels to display hours and minutes
+            numberFormatter: am5.NumberFormatter.new(root, {
+                format: "HH:MM",
+                adapter: {
+                    format: function (value) {
+                        return formatTime(value);
+                    }
+                }
+            })
         }));
 
         // Function to format minutes to hours and minutes
