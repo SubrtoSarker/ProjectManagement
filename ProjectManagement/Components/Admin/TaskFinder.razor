@@ -1,0 +1,21 @@
+﻿@page "/TaskDetail"
+@attribute [TabItemOption(Text = "Task Detail")]
+@using Models.Admin;
+@using ProjectManagement.Models.ProjectModel
+@using ProjectManagement.Services.Session
+@using Services.Admin;
+@using NetcodeHub.Packages.Components.Validations.OnInput;
+@inject IAdminServices admin;
+@inject IJSRuntime JSRuntime
+@inject ToastService Tost
+@inject Blazored.SessionStorage.ISessionStorageService sess
+<PageTitle>Task Detail</PageTitle>
+
+
+@code {
+    public SessionServices session = new SessionServices();
+    protected override async Task OnInitializedAsync()
+    {
+        session = await sess.GetItemAsync<SessionServices>("session");
+    }
+}

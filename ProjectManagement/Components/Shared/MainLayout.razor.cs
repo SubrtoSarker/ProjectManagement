@@ -44,6 +44,8 @@ namespace ProjectManagement.Components.Shared
                 new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" },
                 new() { Text = "Team Progress Report", Icon = "fa-solid fa-chart-area", Url = "/TeamReport" },
                 new() { Text = "Users", Icon = "fa-solid fa-fw fa-users-cog", Url = "/User" },
+                new() { Text = "Task Detail", Icon = "fa-solid fa-fw fa-magnifying-glass", Url = "/TaskDetail" },
+
 
                 new() { Text = "Test", Icon = "fa-solid fa-vial", Url = "/Test" },
                 new() { Text = "Counter", Icon = "fa-solid fa-calculator", Url = "/counter" },
@@ -70,6 +72,7 @@ namespace ProjectManagement.Components.Shared
                     new() { Text = "Project", Icon = "fa-solid fa-fw fa-project-diagram", Url = "/Project" },
                     new() { Text = "Team Progress Report", Icon = "fa-solid fa-chart-area", Url = "/TeamReport" },
                     new() { Text = "Users", Icon = "fa-solid fa-fw fa-users-cog", Url = "/User" },
+                    new() { Text = "Task Detail", Icon = "fa-solid fa-fw fa-magnifying-glass", Url = "/TaskDetail" },
 
                     new() { Text = "Test", Icon = "fa-solid fa-vial", Url = "/Test" },
                     new() { Text = "Counter", Icon = "fa-solid fa-calculator", Url = "/counter" },
@@ -83,6 +86,8 @@ namespace ProjectManagement.Components.Shared
                 menus.AddRange(new List<MenuItem>
                 {
                     new() { Text = "User", Icon = "fa-solid fa-fw fa-users-cog", Url = "/User" },
+                    new() { Text = "Task Detail", Icon = "fa-solid fa-fw fa-magnifying-glass", Url = "/TaskDetail" },
+
                 });
             }
             if (displayAccount == "Superviser")
