@@ -108,7 +108,7 @@
                 {
                     string Email = enc.EncryptString(log.Email);
                     string Password = enc.EncryptString(log.Password);
-                    string Exp = enc.EncryptString(DateTime.UtcNow.AddHours(2).ToString("O"));
+                    string Exp = enc.EncryptString(DateTime.UtcNow.AddHours(8).ToString("O"));
                     await JSRuntime.InvokeVoidAsync("localStorage.setItem", "kjluhasdfo", Email);
                     await JSRuntime.InvokeVoidAsync("localStorage.setItem", "jgfujkgbis", Password);
                     await JSRuntime.InvokeVoidAsync("localStorage.setItem", "fvsygr", Exp);
