@@ -222,5 +222,20 @@ namespace ProjectManagement.Services.TaskM
                 return null;
             }
         }
+        public async Task<Tasks> GetTask(int TaskID)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<Tasks>($"api/Task/GetTask?TaskID={TaskID}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

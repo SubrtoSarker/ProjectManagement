@@ -6,6 +6,7 @@
 @using ProjectManagement.Services.TaskM
 @using Services.Admin;
 @using NetcodeHub.Packages.Components.Validations.OnInput;
+@using ProjectManagement.Models.Task
 @inject IAdminServices admin;
 @inject IJSRuntime JSRuntime
 @inject ToastService Tost
@@ -120,11 +121,16 @@
         TaskID = Task;
         StateHasChanged();
     }
+    public Tasks Current;
     public async void Action(int Action)
     {
         if (Action==1)
         {
             await TaskAction(0, TaskID, 0, 2, new TimeSpan());
+        }
+        else if(Action==2)
+        {
+            Current = await task.GetTask(TaskID);
         }
     }
     public async Task TaskAction(int Type, int TaskID, int User, int Status, TimeSpan time)
