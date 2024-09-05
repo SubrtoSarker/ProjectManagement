@@ -99,5 +99,20 @@ namespace ProjectManagement.Services.Admin
                 return null;
             }
         }
+        public async Task<List<CompleatedReport>> CompleatedReport(DateTime From, DateTime To)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<List<CompleatedReport>>($"api/Admin/GetCompleatedReport?From={From}&To={To}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

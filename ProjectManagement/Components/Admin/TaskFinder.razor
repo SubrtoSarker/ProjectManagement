@@ -3,19 +3,169 @@
 @using Models.Admin;
 @using ProjectManagement.Models.ProjectModel
 @using ProjectManagement.Services.Session
+@using ProjectManagement.Services.TaskM
 @using Services.Admin;
 @using NetcodeHub.Packages.Components.Validations.OnInput;
 @inject IAdminServices admin;
 @inject IJSRuntime JSRuntime
 @inject ToastService Tost
 @inject Blazored.SessionStorage.ISessionStorageService sess
+@inject ITaskServices task
 <PageTitle>Task Detail</PageTitle>
-
-
+<h3>Task Detail</h3>
+<div class="row">
+    <div class="col-md-2 mb-3">
+        <label for="startDate" class="form-label">Start Date:</label>
+        <input type="date" id="startDate" class="form-control" @bind="customStartDate" />
+    </div>
+    <div class="col-md-2 mb-3">
+        <label for="endDate" class="form-label">End Date:</label>
+        <input type="date" id="endDate" class="form-control" @bind="customEndDate" />
+    </div>
+    <div class="col-md-2 mb-3 align-self-end">
+        <button class="btn btn-primary" @onclick="SubmitReport">Show</button>
+    </div>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        <br />
+        @if (CR.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered align-middle">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>Task ID</th>
+                            <th>Task Name</th>
+                            <th>Description</th>
+                            <th>Request From</th>
+                            <th>Project Name</th>
+                            <th>User Name</th>
+                            <th>Team Name</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in CR)
+                        {
+                            <tr class="text-center">
+                                <td>@request.intTaskID</td>
+                                <td>@request.strTaskName</td>
+                                <td>@request.strDescription</td>
+                                <td>@request.strRequestFrom</td>
+                                <td>@request.strProjectName</td>
+                                <td>@request.strUserName</td>
+                                <td>@request.strTeamName</td>
+                                <td>
+                                    <span class="badge @GetStatusBadgeClass(request.strStatus)">
+                                        @request.strStatus
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary"
+                                            @onclick="() => GetTaskID(request.intTaskID)"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#actionModal">
+                                        Action
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-center text-muted">No data available.</p>
+        }
+    </div>
+</div>
+<div class="modal fade fade-in-modal" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="actionModalLabel">Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="btn-group d-flex" role="group">
+                    <button class="btn btn-primary flex-fill" data-bs-dismiss="modal" @onclick="() => Action(1)">
+                        <i class="bi bi-arrow-repeat me-2"></i> Re-Open
+                    </button>
+                    <button class="btn btn-info flex-fill" data-bs-dismiss="modal" @onclick="() => Action(2)">
+                        <i class="bi bi-info-circle me-2"></i> Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @code {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Completed" => "bg-success",
+            "In Progress" => "bg-warning text-dark",
+            "Pending" => "bg-info",
+            "Remove" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+    private int TaskID = 0;
+    public async void GetTaskID(int Task)
+    {
+        TaskID = Task;
+        StateHasChanged();
+    }
+    public async void Action(int Action)
+    {
+        if (Action==1)
+        {
+            await TaskAction(0, TaskID, 0, 2, new TimeSpan());
+        }
+    }
+    public async Task TaskAction(int Type, int TaskID, int User, int Status, TimeSpan time)
+    {
+        string output = await task.TaskManage(Type, TaskID, User, Status, time, session.UserID);
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+        await SubmitReport();
+    }
     public SessionServices session = new SessionServices();
+    private DateTime customStartDate;
+    private DateTime customEndDate;
+    private List<CompleatedReport> CR = new List<CompleatedReport>();
     protected override async Task OnInitializedAsync()
     {
         session = await sess.GetItemAsync<SessionServices>("session");
+        customEndDate = DateTime.Today;
+        customStartDate = customEndDate.AddMonths(-1);
+        StateHasChanged();
+    }
+    private async Task SubmitReport()
+    {
+        try
+        {
+            if (customStartDate == DateTime.MinValue || customEndDate == DateTime.MinValue)
+            {
+                await Tost.Warning("Please select valid start and end dates for the custom report.");
+                return;
+            }
+            CR = await admin.CompleatedReport(customStartDate, customEndDate);
+        }
+        catch (Exception ex)
+        {
+            await Tost.Error(ex.Message);
+        }
+        StateHasChanged();
     }
 }
