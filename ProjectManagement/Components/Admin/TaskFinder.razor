@@ -14,6 +14,57 @@
 @inject ITaskServices task
 <PageTitle>Task Detail</PageTitle>
 <h3>Task Detail</h3>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        @if (Current != null)
+        {
+            <div class="card">
+                <div class="card-header text-center bg-secondary text-black">
+                    <h5>Details</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="text-center">@Current.strTaskName</h2>
+                    <p class="fw-bold text-muted">Requested by: @Current.strRequestFrom</p>
+                    <p class="fw-bold text-muted">Project: @Current.strProjectName</p>
+                    <hr>
+                    <p class="fw-bold">Description:</p>
+                    <p>@Current.strDescription</p>
+                    <hr>
+                    <p class="fw-bold">Steps:</p>
+                    @if (Steps != null && Steps.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var step in Steps)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <label class="form-check-label flex-grow-1" for="@($"checkbox-{step.intStepId}")">@step.strStep</label>
+
+                                        <div class="form-check form-switch me-3">
+                                            <input class="form-check-input" type="checkbox" disabled="disabled" id="@($"checkbox-{step.intStepId}")" checked="@step.isDone"/>
+                                            <label class="form-check-label" for="@($"checkbox-{step.intStepId}")">Done</label>
+                                        </div>
+                                    </div>
+                                </li>
+
+                            }
+                        </ul>
+                    }
+                    <hr>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <div>
+                        <p class="fw-bold">Previous Session: @PreviouSession.ToString(@"hh\:mm\:ss")</p>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <hr />
+        }
+
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-2 mb-3">
         <label for="startDate" class="form-label">Start Date:</label>
@@ -104,6 +155,8 @@
     </div>
 </div>
 @code {
+    private List<Steps> Steps;
+    TimeSpan PreviouSession;
     private string GetStatusBadgeClass(string status)
     {
         return status switch
@@ -131,6 +184,12 @@
         else if(Action==2)
         {
             Current = await task.GetTask(TaskID);
+            if (Current != null)
+            {
+                PreviouSession = Current.tmWorking;
+                Steps = await task.GetStepsByTask(Current.intTaskID);
+            }
+            StateHasChanged();
         }
     }
     public async Task TaskAction(int Type, int TaskID, int User, int Status, TimeSpan time)
