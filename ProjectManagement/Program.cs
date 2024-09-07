@@ -34,7 +34,8 @@ builder.Services.AddTableDemoDataService();
 builder.Services.Configure<HubOptions>(options => options.MaximumReceiveMessageSize = null);
 
 // Register HttpClient services
-var baseAddress = new Uri("https://localhost:5164/");
+//var baseAddress = new Uri("https://localhost:5164/");
+var baseAddress = new Uri("http://10.35.117.134:3422/");
 builder.Services.AddHttpClient<IAuthServices, AuthServices>(client =>
 {
     client.BaseAddress = baseAddress;
