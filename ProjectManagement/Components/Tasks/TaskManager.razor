@@ -134,9 +134,9 @@
 
                         <button class="btn btn-success"
                                 data-bs-toggle="modal"
-                                data-bs-target="#actionModal"
-                                data-bs-title=@Current.strTaskName
-                                onclick="updateModalTitle(this.getAttribute('data-bs-title'))">
+                                data-bs-target="#actionModal">
+                                @* data-bs-title=@Current.strTaskName 
+                                onclick="updateModalTitle(this.getAttribute('data-bs-title'))"> *@
                             Action
                         </button>
                         @if (session.TeamID>1)
@@ -441,9 +441,9 @@
         else
         {
             TimeSpan t1 = TimeSpan.Parse("00:00");
-            await TaskAction(0, TaskID, 0, 1, t1);
             StopAndResetTimer();
             StartTimer();
+            await TaskAction(0, TaskID, 0, 1, t1);
         }
     }
     public async Task TransferCheck(string Task, int TaskID)
@@ -457,8 +457,8 @@
     }
     public async Task Transfer(TimeSpan time)
     {
-        await TaskAction(1, Current.intTaskID, Select, 2, time);
         StopAndResetTimer();
+        await TaskAction(1, Current.intTaskID, Select, 2, time);
     }
     public async Task Change(int TaskID, int StatusID)
     {
@@ -598,10 +598,10 @@
     }
     private async void Sync()
     {
-        await TaskAction(0, Current.intTaskID, 0, 1, elapsedTime);
+        TimeSpan ET = elapsedTime;
         StopAndResetTimer();
         StartTimer();
-        StateHasChanged();
+        await TaskAction(0, Current.intTaskID, 0, 1, ET);
     }
     private void StopAndResetTimer()
     {
