@@ -24,37 +24,20 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 // Add Bootstrap Blazor
 builder.Services.AddBootstrapBlazor();
 builder.Services.AddSingleton<ToastService>();
+
 // Register services
 builder.Services.AddSingleton<WeatherForecastService>();
-
-// Register Table demo data service
 builder.Services.AddTableDemoDataService();
 
 // Configure SignalR options
-builder.Services.Configure<HubOptions>(options => options.MaximumReceiveMessageSize = null);
+builder.Services.Configure<HubOptions>(options => options.MaximumReceiveMessageSize = 1024 * 1024); // 1MB limit for example
 
 // Register HttpClient services
-//var baseAddress = new Uri("https://localhost:5164/");
 var baseAddress = new Uri("http://10.35.117.134:3422/");
-builder.Services.AddHttpClient<IAuthServices, AuthServices>(client =>
-{
-    client.BaseAddress = baseAddress;
-});
-
-builder.Services.AddHttpClient<IProjectService, ProjectService>(client =>
-{
-    client.BaseAddress = baseAddress;
-});
-
-builder.Services.AddHttpClient<IAdminServices, AdminServices>(client =>
-{
-    client.BaseAddress = baseAddress;
-});
-
-builder.Services.AddHttpClient<ITaskServices, TaskServices>(client =>
-{
-    client.BaseAddress = baseAddress;
-});
+builder.Services.AddHttpClient<IAuthServices, AuthServices>(client => { client.BaseAddress = baseAddress; });
+builder.Services.AddHttpClient<IProjectService, ProjectService>(client => { client.BaseAddress = baseAddress; });
+builder.Services.AddHttpClient<IAdminServices, AdminServices>(client => { client.BaseAddress = baseAddress; });
+builder.Services.AddHttpClient<ITaskServices, TaskServices>(client => { client.BaseAddress = baseAddress; });
 
 // Register scoped services
 builder.Services.AddScoped<IEncription, Encription>();
@@ -62,10 +45,8 @@ builder.Services.AddScoped<IEncription, Encription>();
 // Register session storage
 builder.Services.AddBlazoredSessionStorage();
 
-// Register HTTP context accessor
+// Register HTTP context accessor and URL helper factory
 builder.Services.AddHttpContextAccessor();
-
-// Register URL helper factory
 builder.Services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
 
 // Configure session
@@ -77,16 +58,15 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Configure authentication
+// Configure authentication (Ensure correct schemes)
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = "YourDefaultAuthenticationScheme";
-    options.DefaultChallengeScheme = "YourDefaultChallengeScheme";
+    options.DefaultAuthenticateScheme = "Cookies";  // Or use another valid scheme
+    options.DefaultChallengeScheme = "Cookies";  // Ensure valid scheme
 });
-builder.Services.AddResponseCompression(options =>
-{
-    options.EnableForHttps = true;
-});
+
+builder.Services.AddResponseCompression(options => { options.EnableForHttps = true; });
+
 var app = builder.Build();
 
 // Configure middleware
@@ -107,3 +87,4 @@ app.UseSession();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();
+

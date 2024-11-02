@@ -98,11 +98,14 @@
     private async void Load()
     {
         Notify = await task.GetNotify(session.UserID);
-        foreach (var i in Notify)
+        if (Notify.Any())
         {
-            if (i.isNew)
+            foreach (var i in Notify)
             {
-                NewNotificationCount ++;
+                if (i.isNew)
+                {
+                    NewNotificationCount++;
+                }
             }
         }
         StateHasChanged();
