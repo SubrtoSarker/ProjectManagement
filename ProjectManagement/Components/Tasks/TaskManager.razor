@@ -598,10 +598,25 @@
     }
     private async void Sync()
     {
-        TimeSpan ET = elapsedTime;
-        StopAndResetTimer();
-        StartTimer();
-        await TaskAction(0, Current.intTaskID, 0, 1, ET);
+        try
+        {
+            if (Current != null) // Check if Current is not null
+            {
+                TimeSpan ET = elapsedTime;
+                StopAndResetTimer();
+                StartTimer();
+                await TaskAction(0, Current.intTaskID, 0, 1, ET);
+            }
+            else
+            {
+                System.Console.WriteLine("Current task is null during sync.");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"Sync error: {ex.Message}");
+            await Tost.Error("Sync Error", "An error occurred during synchronization.", true);
+        }
     }
     private void StopAndResetTimer()
     {
@@ -627,7 +642,7 @@
     }
     public void Dispose()
     {
-        if (Current != null && Current.intTaskID > 0 && elapsedTime.TotalSeconds>0)
+        if (Current != null && Current.intTaskID > 0 && elapsedTime.TotalSeconds > 0)
         {
             Sync();
         }
