@@ -19,7 +19,12 @@ var builder = WebApplication.CreateBuilder(args);
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 // Add Razor components with interactive server components
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents()
+    .AddCircuitOptions(options =>
+    {
+        options.DetailedErrors = true; // Enables detailed errors
+    });
 
 // Add Bootstrap Blazor
 builder.Services.AddBootstrapBlazor();
@@ -33,7 +38,7 @@ builder.Services.AddTableDemoDataService();
 builder.Services.Configure<HubOptions>(options => options.MaximumReceiveMessageSize = 1024 * 1024); // 1MB limit for example
 
 // Register HttpClient services
-var baseAddress = new Uri("http://10.35.117.134:3422/");
+var baseAddress = new Uri("https://projectmanager.akijbashir.com/");
 builder.Services.AddHttpClient<IAuthServices, AuthServices>(client => { client.BaseAddress = baseAddress; });
 builder.Services.AddHttpClient<IProjectService, ProjectService>(client => { client.BaseAddress = baseAddress; });
 builder.Services.AddHttpClient<IAdminServices, AdminServices>(client => { client.BaseAddress = baseAddress; });
@@ -87,4 +92,3 @@ app.UseSession();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();
-
