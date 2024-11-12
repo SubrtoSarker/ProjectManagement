@@ -294,7 +294,7 @@
                 <div class="card-body">
                     @if (Compete != null && Compete.Any())
                     {
-                        @foreach (var task in Compete)
+                        @foreach (var task in Compete.Take(10))
                         {
                             <div class="card task-card mb-3">
                                 <div class="card-body">
