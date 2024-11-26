@@ -69,7 +69,7 @@
     private LogInModel log = new LogInModel();
     private User user = new User();
     private string? errorMessage;
-    private bool rememberMe;
+    private bool rememberMe, redirect;
     public SessionServices session = new SessionServices();
 
     private async Task Login()
@@ -106,6 +106,12 @@
                 await sess.SetItemAsync("session", session);
                 if (rememberMe)
                 {
+                    string value = enc.DecryptString(await JSRuntime.InvokeAsync<string>("localStorage.getItem", "kjluhasdfo"));
+                    redirect = !string.IsNullOrEmpty(value) &&
+                                    System.Text.RegularExpressions.Regex.IsMatch(
+                                        value,
+                                        @"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+                                    );
                     string Email = enc.EncryptString(log.Email);
                     string Password = enc.EncryptString(log.Password);
                     string Exp = enc.EncryptString(DateTime.UtcNow.AddDays(1).ToString("O"));
@@ -117,7 +123,14 @@
                 {
                     await JSRuntime.InvokeVoidAsync("localStorage.clear");
                 }
-                nav.NavigateTo("/Home");
+                if (redirect)
+                {
+                    nav.NavigateTo("/Task");
+                }
+                else
+                {
+                    nav.NavigateTo("/Home");
+                }
             }
             catch (Exception ex)
             {
@@ -132,6 +145,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        redirect = false;
         if (firstRender)
         {
             try
@@ -158,8 +172,9 @@
                             log.Email = enc.DecryptString(userEmail);
                             log.Password = enc.DecryptString(userPassword);
                             rememberMe = true;
-                            StateHasChanged();
+                            redirect = true;
                             await Login();
+                            StateHasChanged();
                         }
                     }
                 }

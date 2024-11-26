@@ -9,6 +9,7 @@
 @inject ITaskServices task
 @inject IJSRuntime JSRuntime
 @inject ToastService Tost
+@inject NavigationManager nav
 @implements IDisposable
 <PageTitle>Task</PageTitle>
 
@@ -589,7 +590,7 @@
         {
             var now = DateTime.Now;
             elapsedTime = now - startTime;
-            if (elapsedTime.TotalMinutes >= 10)
+            if (elapsedTime.TotalMinutes > 5)
             {
                 Sync();
             }
@@ -614,8 +615,7 @@
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"Sync error: {ex.Message}");
-            await Tost.Error("Sync Error", $"An error occurred during synchronization: {ex.Message}", true);
+            nav.NavigateTo("/");
         }
     }
     private void StopAndResetTimer()
