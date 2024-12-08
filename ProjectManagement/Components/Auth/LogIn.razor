@@ -106,7 +106,8 @@
                 await sess.SetItemAsync("session", session);
                 if (rememberMe)
                 {
-                    string value = enc.DecryptString(await JSRuntime.InvokeAsync<string>("localStorage.getItem", "kjluhasdfo"));
+                    string encryptedValue = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "kjluhasdfo");
+                    string value = encryptedValue != null ? enc.DecryptString(encryptedValue) : "";
                     redirect = !string.IsNullOrEmpty(value) &&
                                     System.Text.RegularExpressions.Regex.IsMatch(
                                         value,

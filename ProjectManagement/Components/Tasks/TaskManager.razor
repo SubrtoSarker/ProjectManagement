@@ -558,11 +558,10 @@
     }
     protected void StartTimer()
     {
+        StopAndResetTimer(); // Ensure previous timer is stopped
         startTime = DateTime.Now;
-
-        // Update the elapsed time every second
         timer = new System.Timers.Timer(1000);
-        timer.Elapsed += (sender, e) => { InvokeAsync(UpdateElapsedTime); };
+        timer.Elapsed += async (sender, e) => await InvokeAsync(UpdateElapsedTime);
         timer.Start();
     }
 
@@ -584,23 +583,35 @@
 
         StateHasChanged(); // Notify Blazor to update the UI
     }
+    private DateTime lastUIUpdate = DateTime.MinValue;
     private void UpdateElapsedTime()
     {
         if (!isPaused)
         {
-            var now = DateTime.Now;
-            elapsedTime = now - startTime;
+            elapsedTime = DateTime.Now - startTime;
+
+            // Call Sync if elapsed time exceeds 5 minutes
             if (elapsedTime.TotalMinutes > 5)
             {
                 Sync();
             }
-            StateHasChanged(); // Notify Blazor to update the UI
+
+            // Debounce UI updates to once per second
+            if ((DateTime.Now - lastUIUpdate).TotalSeconds > 1)
+            {
+                lastUIUpdate = DateTime.Now;
+                InvokeAsync(StateHasChanged); // Ensure UI updates on the Blazor UI thread
+            }
         }
     }
+
+    private readonly SemaphoreSlim syncLock = new SemaphoreSlim(1, 1);
+
     private async void Sync()
     {
         try
         {
+            await syncLock.WaitAsync(); // Acquire the lock asynchronously
             if (Current != null) // Check if Current is not null
             {
                 TimeSpan ET = elapsedTime;
@@ -615,9 +626,15 @@
         }
         catch (Exception ex)
         {
+            System.Console.WriteLine($"Error in Sync: {ex.Message}");
             nav.NavigateTo("/");
         }
+        finally
+        {
+            syncLock.Release(); // Release the lock
+        }
     }
+
     private void StopAndResetTimer()
     {
         if (timer != null)
@@ -642,9 +659,6 @@
     }
     public void Dispose()
     {
-        if (Current != null && Current.intTaskID > 0 && elapsedTime.TotalSeconds > 0)
-        {
-            Sync();
-        }
+        timer?.Dispose();
     }
 }
