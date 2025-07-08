@@ -118,18 +118,18 @@
                                     <p class="fw-bold text-muted mb-0">Task Count: @item.TaskCount</p>
                                     <div>
                                         <button class="btn btn-sm btn-primary me-2"
-                                                @onclick="() => GetProjectID(item.intProjectID)"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#AddTask"
-                                                title="Add Task">
+                                        @onclick="() => GetProjectID(item.intProjectID)"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#AddTask"
+                                        title="Add Task">
                                             <i class="bi bi-plus-circle"></i>
                                         </button>
 
                                         <button class="btn btn-sm btn-secondary"
-                                                @onclick="() => InitlizeTime(item.intProjectID)"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#AddRequest"
-                                                title="Add Request">
+                                        @onclick="() => InitlizeTime(item.intProjectID)"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#AddRequest"
+                                        title="Add Request">
                                             <i class="bi bi-envelope-plus"></i>
                                         </button>
                                     </div>
@@ -221,9 +221,9 @@
                                 <td>@request.strFrom</td>
                                 <td>@request.strTo</td>
                                 <button class="btn btn-primary"
-                                        data-bs-toggle="modal"
-                                        @onclick="() => GetRequestID(request.intID)"
-                                        data-bs-target="#actionModal">
+                                data-bs-toggle="modal"
+                                @onclick="() => GetRequestID(request.intID)"
+                                data-bs-target="#actionModal">
                                     Action
                                 </button>
                             </tr>
@@ -257,6 +257,28 @@
                     <div class="row">
                         <FloatingText id="Req" type="text" class="form-control" @bind-Value="newTask.strRequestFrom" Label="Request From"/>
                         <ValidationMessage class="text-danger" For="@(() => newTask.strRequestFrom)" />
+                    </div>
+                    <div class="row mb-3 align-items-center">
+                        <label for="Priroty" class="col-sm-3 col-form-label text-muted">Priority</label>
+                        <div class="col-sm-9">
+                            <InputSelect id="Priroty" class="form-control" @bind-Value="newTask.Priroty">
+                                @foreach (TaskPriority priority in Enum.GetValues(typeof(TaskPriority)))
+                                {
+                                    <option value="@priority">@priority</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => newTask.Priroty)" class="text-danger" />
+                        </div>
+                    </div>
+                    <div class="row mb-3 align-items-center">
+                        <label for="DeadLine" class="col-sm-3 col-form-label text-muted">Dead Line</label>
+                        <div class="col-sm-9">
+                            <InputDate @bind-Value="newTask.DeadLine"
+                            id="DeadLine"
+                            class="form-control"
+                            min="@DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd")" />
+                            <ValidationMessage For="@(() => newTask.DeadLine)" class="text-danger" />
+                        </div>
                     </div>
                     <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">ADD</button>
                 </EditForm>
@@ -342,7 +364,10 @@
 {
     public SessionServices session = new SessionServices();
     public List<ProjectPerUser> ppu = new List<ProjectPerUser>();
-    private TaskCreate newTask = new TaskCreate();
+    private TaskCreate newTask = new TaskCreate()
+    {
+        DeadLine = DateOnly.FromDateTime(DateTime.Today)
+    };
     public int ProjectID;
     private int Type = 7;
     public List<Request> PR = new List<Request>();
@@ -411,7 +436,19 @@
         string Name = newTask.strTaskName;
         string Desc = newTask.strDescription;
         string ReqFrom = newTask.strRequestFrom;
-        string output = await task.CreateTask(Name, Desc, ReqFrom, session.UserID, ProjectID);
+        int Priroty = (int)newTask.Priroty;
+        if (!(Priroty>0))
+        {
+            await Toast.Warning("Warning", "Priority must be selected.", true);
+            return;
+        }
+        DateOnly DeadLine = newTask.DeadLine;
+        if (DeadLine < DateOnly.FromDateTime(DateTime.Today))
+        {
+            await Toast.Warning("Warning", "Deadline must be today or a future date.", true);
+            return;
+        }
+        string output = await task.CreateTask(Name, Desc, ReqFrom, Priroty, DeadLine, session.UserID, ProjectID);
         if (output.Contains("Success"))
         {
             await Toast.Success("Success", output, true);

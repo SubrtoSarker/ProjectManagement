@@ -25,12 +25,12 @@ namespace ProjectManagement.Services.TaskM
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.Key);
             }
         }
-        public async Task<string> CreateTask(string Name, string Description, string ReqFrom, int Enroll, int Project)
+        public async Task<string> CreateTask(string Name, string Description, string ReqFrom, int Priroty, DateOnly DeadLine, int Enroll, int Project)
         {
             try
             {
                 await SetAuthorizationHeader();
-                var result = await _httpClient.GetFromJsonAsync<string>($"api/Task/CreateTask?Name={Name}&Description={Description}&ReqFrom={ReqFrom}&Enroll={Enroll}&Project={Project}");
+                var result = await _httpClient.GetFromJsonAsync<string>($"api/Task/CreateTask?Name={Name}&Description={Description}&ReqFrom={ReqFrom}&Priroty={Priroty}&DeadLine={DeadLine}&Enroll={Enroll}&Project={Project}");
                 return result;
             }
             catch (Exception ex)
