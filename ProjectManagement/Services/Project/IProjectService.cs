@@ -4,7 +4,7 @@ namespace ProjectManagement.Services.Project
 {
     public interface IProjectService
     {
-        Task<string> Create(string Name, int Enroll);
+        Task<string> Create(string Name, DateOnly DeadLIne, int Enroll);
         Task<List<Projects>> GetProjectByTeam(int TeamID, int Enroll);
         Task<string> UdateStatus(int Type, int Project, int Enroll);
         Task<List<UserPerProject>> GetUserPerProject(int TeamID, int ProjectID);

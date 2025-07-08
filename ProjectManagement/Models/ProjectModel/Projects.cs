@@ -9,6 +9,8 @@ namespace ProjectManagement.Models.ProjectModel
         public int IntProjectID { get; set; }
         [Display(Name = "Name")]
         public string StrProjectName { get; set; }
+        [Display(Name = "DueDay")]
+        public DateOnly dteDeadLine { get; set; }
         [Display(Name = "Compleate")]
         public bool IsCompleate { get; set; }
         [Display(Name = "Agging")]

@@ -28,12 +28,76 @@
             <div class="row">
                 @foreach (var item in ppu)
                 {
+                    var fromDate = DateOnly.FromDateTime(DateTime.Today);
+                    var toDate = item.dteDeadLine;
+
+                    bool isPast = false;
+                    bool isSoon = false;
+
+                    // Determine if the date is past, today, or soon
+                    if (toDate < fromDate)
+                    {
+                        isPast = true;
+                    }
+                    else
+                    {
+                        var daysUntil = toDate.DayNumber - fromDate.DayNumber;
+                        if (daysUntil <= 30)
+                        {
+                            isSoon = true;
+                        }
+                    }
+
+                    // Calculate difference (normalize fromDate/toDate)
+                    var start = toDate < fromDate ? toDate : fromDate;
+                    var end = toDate < fromDate ? fromDate : toDate;
+
+                    int years = end.Year - start.Year;
+                    int months = end.Month - start.Month;
+                    int days = end.Day - start.Day;
+
+                    if (days < 0)
+                    {
+                        months--;
+                        var previousMonth = end.AddMonths(-1);
+                        int daysInPrevMonth = DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month);
+                        days += daysInPrevMonth;
+                    }
+
+                    if (months < 0)
+                    {
+                        years--;
+                        months += 12;
+                    }
+
+                    string result = "";
+                    if (years > 0) result += $"{years} year{(years != 1 ? "s" : "")} ";
+                    if (months > 0) result += $"{months} month{(months != 1 ? "s" : "")} ";
+                    if (days > 0) result += $"{days} day{(days != 1 ? "s" : "")}";
+
+                    if (string.IsNullOrWhiteSpace(result))
+                        result = "Today";
+
+                    result = result.Trim();
+
+                    string cssbg = "secondary";
+                    string csstext = "muted";
+                    if (isPast)
+                    {
+                        cssbg = "danger";
+                        csstext = "danger";
+                    }
+                    else if (isSoon)
+                    {
+                        cssbg = "warning";
+                        csstext = "warning";
+                    }
                     <div class="col-md-3 mb-2">
                         <div class="card-sm">
-                            <div class="card-header text-center bg-secondary text-black">
+                            <div class="card-header text-center bg-@cssbg text-black">
                                 <h5 class="mt-2 ms-2">
                                     @item.strProjectName
-                                    <button class="btn btn-primary btn-sm"
+                                    @* <button class="btn btn-primary btn-sm"
                                         @onclick="() => GetProjectID(item.intProjectID)"
                                         data-bs-toggle="modal"
                                         data-bs-target="#AddTask">
@@ -44,12 +108,34 @@
                                             data-bs-toggle="modal"
                                             data-bs-target="#AddRequest">
                                         <i class="bi bi-envelope-plus"></i>
-                                    </button>
+                                    </button> *@
                                 </h5>
                             </div>
+
                             <div class="card-body">
-                                <p class="fw-bold text-muted">Task Count : @item.TaskCount</p>
+                                @* <p class="fw-bold text-muted">Task Count : @item.TaskCount</p> *@
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <p class="fw-bold text-muted mb-0">Task Count: @item.TaskCount</p>
+                                    <div>
+                                        <button class="btn btn-sm btn-primary me-2"
+                                                @onclick="() => GetProjectID(item.intProjectID)"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#AddTask"
+                                                title="Add Task">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </button>
+
+                                        <button class="btn btn-sm btn-secondary"
+                                                @onclick="() => InitlizeTime(item.intProjectID)"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#AddRequest"
+                                                title="Add Request">
+                                            <i class="bi bi-envelope-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
                                 <p class="fw-bold text-muted">Total Users : @item.UserCount</p>
+                                <p class="fw-bold text-@csstext">Due Day : @result @(isPast ? "ago" : "")</p>
                                 <p class="fw-bold text-muted">Assigned : @item.Lenght</p>
                                 <hr>
                             </div>

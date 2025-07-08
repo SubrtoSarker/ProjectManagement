@@ -42,19 +42,17 @@ namespace ProjectManagement.Services.Project
             }
         }
 
-        public async Task<string> Create(string Name, int Enroll)
+        public async Task<string> Create(string Name, DateOnly DeadLine, int Enroll)
         {
             try
             {
                 await SetAuthorizationHeader();
-                var result = await _httpClient.GetFromJsonAsync<string>($"api/Project/Create?Name={Name}&Enroll={Enroll}");
+                var result = await _httpClient.GetFromJsonAsync<string>($"api/Project/Create?Name={Name}&DeadLine={DeadLine}&Enroll={Enroll}");
                 return result;
             }
             catch (Exception ex)
             {
-                // Log the exception for debugging purposes
-                Console.WriteLine($"An error occurred: {ex.Message}");
-                return null;
+                return ex.Message;
             }
         }
 

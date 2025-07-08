@@ -6,5 +6,8 @@ namespace ProjectManagement.Models.ProjectModel
     {
         [Required(ErrorMessage = "Name is required.")]
         public string Name { get; set; }
+
+        [Required(ErrorMessage = "Date is required.")]
+        public DateOnly DeadLine { get; set; }
     }
 }
