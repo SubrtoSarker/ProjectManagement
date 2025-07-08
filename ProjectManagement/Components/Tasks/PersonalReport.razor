@@ -312,12 +312,12 @@
                 worksheet.Cell(1, 1).Value = "Pending Task Report";
                 worksheet.Cell(1, 1).Style.Font.Bold = true;
                 worksheet.Cell(1, 1).Style.Font.FontSize = 16;
-                worksheet.Range(1, 1, 1, 6).Merge(); // Merge cells A1 to H1
+                worksheet.Range(1, 1, 1, 10).Merge(); // Merge cells A1 to H1
                 worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                 //worksheet.Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
 
                 // Add headers starting from the second row
-                var headerRange = worksheet.Range(2, 1, 2, 6);
+                var headerRange = worksheet.Range(2, 1, 2, 10);
                 headerRange.Style.Font.Bold = true;
                 //headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                 //headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
@@ -328,6 +328,11 @@
                 worksheet.Cell(2, 4).Value = "Description";
                 worksheet.Cell(2, 5).Value = "Status";
                 worksheet.Cell(2, 6).Value = "Working Time";
+                worksheet.Cell(2, 7).Value = "Created Date";
+                worksheet.Cell(2, 8).Value = "DueDate";
+                worksheet.Cell(2, 9).Value = "Priority";
+                worksheet.Cell(2, 10).Value = "Request By";
+
 
                 // Add data starting from the third row
                 for (int i = 0; i < PendingTasks.Count; i++)
@@ -338,15 +343,26 @@
                     worksheet.Cell(i + 3, 4).Value = PendingTasks[i].strDescription;
                     worksheet.Cell(i + 3, 5).Value = PendingTasks[i].strStatus;
                     worksheet.Cell(i + 3, 6).Value = PendingTasks[i].tmWorking.ToString();
+                    worksheet.Cell(i + 3, 7).Value = PendingTasks[i].dteCreated.ToString();
+                    worksheet.Cell(i + 3, 8).Value = PendingTasks[i].dteDeadLine.ToString();
+                    worksheet.Cell(i + 3, 9).Value = ((TaskPriority)PendingTasks[i].intPriroty).ToString();
+                    worksheet.Cell(i + 3, 10).Value = PendingTasks[i].strRequestFrom.ToString();
+
                 }
 
                 // Create a table from the data range without filters
-                var dataRange = worksheet.Range(2, 1, PendingTasks.Count + 2, 6);
+                var dataRange = worksheet.Range(2, 1, PendingTasks.Count + 2, 10);
                 var table = dataRange.CreateTable();
                 table.ShowAutoFilter = false; // Disable filtering
 
                 // Auto-fit columns
-                worksheet.Columns().AdjustToContents();
+                foreach (var column in worksheet.ColumnsUsed())
+                {
+                    if (column.ColumnNumber() != 4)
+                    {
+                        column.AdjustToContents();
+                    }
+                }
 
                 // Convert the workbook to a byte array
                 using (var stream = new MemoryStream())

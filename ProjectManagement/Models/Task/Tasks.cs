@@ -9,6 +9,8 @@ namespace ProjectManagement.Models.Task
         public string strTaskName { get; set; }
         public string strDescription { get; set; }
         public string strRequestFrom { get; set; }
+        public int intPriroty { get; set; }
+        public DateOnly dteDeadLine { get; set; }
         public TimeSpan tmWorking { get; set; }
         public string Agging { get; set; }
         public string strProjectName { get; set; }

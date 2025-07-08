@@ -81,6 +81,14 @@
                     <hr>
                     <p class="fw-bold">Description:</p>
                     <p>@Current.strDescription</p>
+                    <p>
+                        Due Date: @Current.dteDeadLine.ToString("dd MMM")
+                        <span class="ms-3">
+                            Priority: <span class="badge bg-@GetPriorityBadge(Current.intPriroty)">
+                                @((TaskPriority)Current.intPriroty)
+                            </span>
+                        </span>
+                    </p>
                     <hr>
                     <p class="fw-bold">Steps:</p>
                     @if (Steps != null && Steps.Any())
@@ -182,22 +190,65 @@
                     {
                         @foreach (var task in ToDo)
                         {
-                            <div class="card task-card mb-3">
+                            var today = DateOnly.FromDateTime(DateTime.Today);
+                            bool isPastDeadline = task.dteDeadLine < today;
+                            bool isNearDeadline = task.dteDeadLine >= today && task.dteDeadLine <= today.AddDays(7);
+
+                            string priorityText = ((TaskPriority)task.intPriroty).ToString();
+                            string priorityIcon = task.intPriroty switch
+                            {
+                                4 => "🔥", // Critical
+                                3 => "⚠️", // High
+                                2 => "🔶", // Medium
+                                1 => "✅", // Low
+                                _ => ""
+                            };
+
+                            <div class="card task-card mb-3"
+                                 style="background-color: #f8f9fa; /* light neutral */ border: 2px solid @(isPastDeadline ? "#dc3545" : isNearDeadline ? "#ffc107" : "#ced4da");">
                                 <div class="card-body">
-                                    <h5 class="card-title">@task.strTaskName</h5>
-                                    <p class="card-text">@task.strDescription</p>
-                                    <p class="card-text">@task.strProjectName</p>
-                                    <div class="text-muted mt-2">
-                                        <small>
-                                            @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")
-                                        </small>
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="card-title mb-1">@task.strTaskName</h5>
+                                            <p class="card-text mb-1">@task.strDescription</p>
+                                            <p class="card-text text-muted mb-2">@task.strProjectName</p>
+                                            <div class="text-muted">
+                                                <small>
+                                                    <strong>@task.strRequestFrom</strong> |
+                                                    ⏱ @task.tmWorking.ToString("hh\\:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-end">
+                                            @if (isPastDeadline)
+                                            {
+                                                <span class="badge" style="background-color:#dc3545; color:white;">❗ Overdue</span>
+                                            }
+                                            else if (isNearDeadline)
+                                            {
+                                                <span class="badge" style="background-color:#ffc107; color:black;">⏰ Due Soon</span>
+                                            }
+
+                                            <span class="badge" style="background-color:#6c757d; color:white;">
+                                                @priorityIcon @priorityText
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div class="task-buttons">
-                                        <button type="button" @onclick="() => Start(task.intTaskID)" class="btn btn-secondary task-button" title="Start">
-                                            Start
+
+                                    <div class="task-buttons mt-3">
+                                        <button type="button"
+                                                @onclick="() => Start(task.intTaskID)"
+                                                class="btn btn-sm btn-dark me-2"
+                                                title="Start">
+                                            ▶
                                         </button>
-                                        <button type="button" @onclick="() => Change(task.intTaskID,3)" class="btn btn-warning task-button" title="On Hold">
-                                            On Hold
+
+                                        <button type="button"
+                                                @onclick="() => Change(task.intTaskID, 3)"
+                                                class="btn btn-sm btn-secondary"
+                                                title="On Hold">
+                                            ⏸
                                         </button>
                                     </div>
                                 </div>
@@ -221,27 +272,73 @@
                     {
                         @foreach (var task in OnHold)
                         {
-                            <div class="card task-card mb-3">
+                            var today = DateOnly.FromDateTime(DateTime.Today);
+                            bool isPastDeadline = task.dteDeadLine < today;
+                            bool isNearDeadline = task.dteDeadLine >= today && task.dteDeadLine <= today.AddDays(7);
+
+                            string priorityText = ((TaskPriority)task.intPriroty).ToString();
+                            string priorityIcon = task.intPriroty switch
+                            {
+                                4 => "🔥", // Critical
+                                3 => "⚠️", // High
+                                2 => "🔶", // Medium
+                                1 => "✅", // Low
+                                _ => ""
+                            };
+
+                            <div class="card task-card mb-3"
+                                 style="background-color: #f8f9fa;
+            border: 2px solid @(isPastDeadline ? "#dc3545" : isNearDeadline ? "#ffc107" : "#ced4da");
+                    ">
                                 <div class="card-body">
-                                    <h5 class="card-title">@task.strTaskName</h5>
-                                    <p class="card-text">@task.strDescription</p>
-                                    <p class="card-text">@task.strProjectName</p>
-                                    <div class="text-muted mt-2">
-                                        <small>
-                                            @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")
-                                        </small>
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="card-title mb-1">@task.strTaskName</h5>
+                                            <p class="card-text mb-1">@task.strDescription</p>
+                                            <p class="card-text text-muted mb-2">@task.strProjectName</p>
+                                            <div class="text-muted">
+                                                <small>
+                                                    <strong>@task.strRequestFrom</strong> |
+                                                    ⏱ @task.tmWorking.ToString("hh\\:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-end">
+                                            @if (isPastDeadline)
+                                            {
+                                                <span class="badge" style="background-color:#dc3545; color:white;">❗ Overdue</span>
+                                            }
+                                            else if (isNearDeadline)
+                                            {
+                                                <span class="badge" style="background-color:#ffc107; color:black;">⏰ Due Soon</span>
+                                            }
+
+                                            <span class="badge" style="background-color:#6c757d; color:white;">
+                                                @priorityIcon @priorityText
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div class="task-buttons">
-                                        <button type="button" @onclick="() => Start(task.intTaskID)" class="btn btn-secondary task-button" title="Start">
-                                            Start
+
+                                    <div class="task-buttons mt-3">
+                                        <button type="button"
+                                                @onclick="() => Start(task.intTaskID)"
+                                                class="btn btn-sm btn-dark me-2"
+                                                title="Start">
+                                            ▶
                                         </button>
-                                        <button type="button" @onclick="() => Change(task.intTaskID,2)" class="btn btn-primary task-button" title="Start">
-                                            TO DO
+
+                                        <button type="button"
+                                                @onclick="() => Change(task.intTaskID, 2)"
+                                                class="btn btn-sm btn-light"
+                                                title="Move to To Do">
+                                            📝
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         }
+
                     }
                     else
                     {
@@ -260,27 +357,71 @@
                     {
                         @foreach (var task in InReview)
                         {
-                            <div class="card task-card mb-3">
+                            var today = DateOnly.FromDateTime(DateTime.Today);
+                            bool isPastDeadline = task.dteDeadLine < today;
+                            bool isNearDeadline = task.dteDeadLine >= today && task.dteDeadLine <= today.AddDays(7);
+
+                            string priorityText = ((TaskPriority)task.intPriroty).ToString();
+                            string priorityIcon = task.intPriroty switch
+                            {
+                                4 => "🔥", // Critical
+                                3 => "⚠️", // High
+                                2 => "🔶", // Medium
+                                1 => "✅", // Low
+                                _ => ""
+                            };
+
+                            <div class="card task-card mb-3"
+                                 style=" background-color: #f8f9fa; border: 2px solid @(isPastDeadline ? "#dc3545" : isNearDeadline ? "#ffc107" : "#ced4da");">
                                 <div class="card-body">
-                                    <h5 class="card-title">@task.strTaskName</h5>
-                                    <p class="card-text">@task.strDescription</p>
-                                    <p class="card-text">@task.strProjectName</p>
-                                    <div class="text-muted mt-2">
-                                        <small>
-                                            @task.strRequestFrom | @task.tmWorking.ToString("hh\\:mm")
-                                        </small>
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="card-title mb-1">@task.strTaskName</h5>
+                                            <p class="card-text mb-1">@task.strDescription</p>
+                                            <p class="card-text text-muted mb-2">@task.strProjectName</p>
+                                            <div class="text-muted">
+                                                <small>
+                                                    <strong>@task.strRequestFrom</strong> |
+                                                    ⏱ @task.tmWorking.ToString("hh\\:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-end">
+                                            @if (isPastDeadline)
+                                            {
+                                                <span class="badge" style="background-color:#dc3545; color:white;">❗ Overdue</span>
+                                            }
+                                            else if (isNearDeadline)
+                                            {
+                                                <span class="badge" style="background-color:#ffc107; color:black;">⏰ Due Soon</span>
+                                            }
+
+                                            <span class="badge" style="background-color:#6c757d; color:white;">
+                                                @priorityIcon @priorityText
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div class="task-buttons">
-                                        <button type="button" @onclick="() => Start(task.intTaskID)" class="btn btn-secondary task-button" title="Start">
-                                            Start
+
+                                    <div class="task-buttons mt-3">
+                                        <button type="button"
+                                                @onclick="() => Start(task.intTaskID)"
+                                                class="btn btn-sm btn-dark me-2"
+                                                title="Start">
+                                            ▶
                                         </button>
-                                        <button type="button" @onclick="() => Change(task.intTaskID, 5)" class="btn btn-success task-button" title="On Hold">
-                                            Complete
+
+                                        <button type="button"
+                                                @onclick="() => Change(task.intTaskID, 5)"
+                                                class="btn btn-sm btn-success"
+                                                title="Complete">
+                                            ✅
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         }
+
                     }
                     else
                     {
@@ -606,7 +747,17 @@
             }
         }
     }
-
+    private string GetPriorityBadge(int priority)
+    {
+        return priority switch
+        {
+            4 => "danger",   // Critical (red)
+            3 => "warning",  // High (orange/yellow)
+            2 => "info",     // Medium (blue)
+            1 => "success",  // Low (green)
+            _ => "secondary" // Default (gray)
+        };
+    }
     private readonly SemaphoreSlim syncLock = new SemaphoreSlim(1, 1);
 
     private async void Sync()
