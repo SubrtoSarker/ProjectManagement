@@ -21,14 +21,14 @@
         transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.5s ease;
     }
 
-       
+
 
     .task-card:hover .task-button {
         opacity: 1;
         transform: translateY(5px);
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
-    
+
 </style>
 <style>
     .task-card {
@@ -63,7 +63,7 @@
         @if (Current == null)
         {
             <div class="card">
-            <div class="card-header text-center bg-secondary text-black">
+                <div class="card-header text-center bg-secondary text-black">
                     <h5>No Current Task</h5>
                 </div>
             </div>
@@ -71,7 +71,7 @@
         else
         {
             <div class="card">
-            <div class="card-header text-center bg-secondary text-black">
+                <div class="card-header text-center bg-secondary text-black">
                     <h5>In Progress</h5>
                 </div>
                 <div class="card-body">
@@ -106,9 +106,9 @@
                                         </div>
 
                                         <button class="btn btn-primary"
-                                                @onclick="() => SetStep(step.strStep, step.intStepId)"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#EditStep">
+                                        @onclick="() => SetStep(step.strStep, step.intStepId)"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#EditStep">
                                             <i class="bi bi-pen"></i>
                                         </button>
                                     </div>
@@ -121,7 +121,13 @@
                     @if (!showTextbox)
                     {
                         <div class="mt-3">
-                            <button class="btn btn-primary" @onclick="ToggleTextbox">Add Step</button>
+                            <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center"
+                            style="width: 40px; height: 36px; border-radius: 6px;"
+                            title="Add Step"
+                            @onclick="ToggleTextbox">
+                                <i class="bi bi-plus"></i>
+                            </button>
+
                         </div>
                     }
                     @if (showTextbox)
@@ -133,35 +139,114 @@
                                     <FloatingText id="UserName" type="text" class="form-control" @bind-Value="newProject.Name" Label="Step" />
                                     <ValidationMessage class="text-danger" For="@(() => newProject.Name)" />
                                 </div>
-                            <button type="submit" class="btn btn-primary">ADD</button>
-                            <button class="btn btn-warning" @onclick="CancelStep">Cancel</button>
+                                <button type="submit" class="btn btn-primary">ADD</button>
+                                <button class="btn btn-warning" @onclick="CancelStep">Cancel</button>
                             </EditForm>
                         </div>
                     }
                     <hr>
 
-                    <div class="mt-3">
-                        <button class="btn" style="@ButtonStyle" @onclick="TogglePause">@(isPaused ? "Resume" : "Pause")</button>
+                    <div class="mt-3 d-flex flex-wrap align-items-center gap-2">
 
-                        <button class="btn btn-success"
-                                data-bs-toggle="modal"
-                                data-bs-target="#actionModal">
-                                @* data-bs-title=@Current.strTaskName 
-                                onclick="updateModalTitle(this.getAttribute('data-bs-title'))"> *@
-                            Action
-                        </button>
-                        @if (session.TeamID>1)
-                        {
-                            <button class="btn btn-primary ms-1"
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+
+                            <!-- Pause / Resume Button -->
+                            <button class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center"
+                            style="width: 40px; height: 36px; border-radius: 6px;"
+                            title="@(isPaused ? "Resume" : "Pause")"
+                            @onclick="TogglePause">
+                                <i class="bi @(isPaused ? "bi-play-fill text-success" : "bi-pause-fill text-warning")"></i>
+                            </button>
+
+
+
+                            @if (session.TeamID > 1)
+                            {
+                                <!-- Transfer Button -->
+                                <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center"
                                 data-bs-toggle="modal"
                                 data-bs-target="#TranferModal"
-                                data-bs-title=@Current.strTaskName
-                                @onclick="() => TransferCheck(Current.strTaskName,Current.intTaskID)">
-                                Transfer
+                                data-bs-title="@Current.strTaskName"
+                                title="Transfer"
+                                style="width: 40px; height: 36px; border-radius: 6px;"
+                                @onclick="() => TransferCheck(Current.strTaskName, Current.intTaskID)">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </button>
+                            }
+
+                            <!-- Sync Button -->
+                            <button type="button"
+                            class="btn btn-sm btn-outline-info d-flex justify-content-center align-items-center"
+                            title="Sync"
+                            style="width: 40px; height: 36px; border-radius: 6px;"
+                            @onclick="Sync">
+                                <i class="bi bi-arrow-repeat"></i>
                             </button>
-                        }
-                        <button class="btn ms-2" style="background-color: #20c997; color: white;" @onclick="Sync"><i class="fas fa-sync-alt"></i> Sync </button>
+
+                        </div>
+
+                        <!-- Action Button -->
+                        @* <button class="btn btn-outline-success d-flex align-items-center justify-content-center"
+                                data-bs-toggle="modal"
+                                data-bs-target="#actionModal"
+                                style="width: 100px; height: 36px; border-radius: 6px;">
+                            Action
+                        </button> *@
+
+                        <div class="task-buttons mt-3 d-flex flex-wrap gap-2 ms-auto">
+
+                            <!-- Move to Queue -->
+                            <button type="button"
+                            class="btn btn-sm btn-outline-primary d-flex justify-content-center align-items-center"
+                            title="Move to Queue"
+                            style="width: 40px; height: 36px; border-radius: 6px;"
+                            @onclick="() => TaskAction(0, Current.intTaskID, 0, 2, elapsedTime)">
+                                <i class="bi bi-journal-text"></i>
+                            </button>
+
+                            <!-- Awaiting Action -->
+                            <button type="button"
+                            class="btn btn-sm btn-outline-warning d-flex justify-content-center align-items-center"
+                            title="Awaiting Action"
+                            style="width: 40px; height: 36px; border-radius: 6px;"
+                            @onclick="() => TaskAction(0, Current.intTaskID, 0, 3, elapsedTime)">
+                                <i class="bi bi-pause-fill"></i>
+                            </button>
+
+                            <!-- Evaluation -->
+                            <button type="button"
+                            class="btn btn-sm btn-outline-info d-flex justify-content-center align-items-center"
+                            title="Evaluation"
+                            style="width: 40px; height: 36px; border-radius: 6px;"
+                            data-bs-dismiss="modal"
+                            @onclick="() => TaskAction(0, Current.intTaskID, 0, 4, elapsedTime)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+
+                            <!-- Complete -->
+                            <button type="button"
+                            class="btn btn-sm btn-outline-success d-flex justify-content-center align-items-center"
+                            title="Complete"
+                            style="width: 40px; height: 36px; border-radius: 6px;"
+                            data-bs-dismiss="modal"
+                            @onclick="() => TaskAction(0, Current.intTaskID, 0, 5, elapsedTime)">
+                                <i class="bi bi-check2"></i>
+                            </button>
+
+                            <!-- Delete -->
+                            <button type="button"
+                            class="btn btn-sm btn-outline-danger d-flex justify-content-center align-items-center"
+                            title="Delete"
+                            style="width: 40px; height: 36px; border-radius: 6px;"
+                            data-bs-dismiss="modal"
+                            @onclick="() => TaskAction(0, Current.intTaskID, 0, 6, elapsedTime)">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+
+                        </div>
+
                     </div>
+
                 </div>
                 <div class="card-footer d-flex justify-content-between">
                     <div>
@@ -183,7 +268,7 @@
         <div class="col-md-3">
             <div class="card kanban-column">
                 <div class="card-header bg-primary text-white text-center">
-                    <h3>TO DO <span>@(ToDo != null ? $"({ToDo.Count()})" : "(0)")</span></h3>
+                    <h3>Queue <span>@(ToDo != null ? $"({ToDo.Count()})" : "(0)")</span></h3>
                 </div>
                 <div class="card-body">
                     @if (ToDo != null && ToDo.Any())
@@ -204,8 +289,7 @@
                                 _ => ""
                             };
 
-                            <div class="card task-card mb-3"
-                                 style="background-color: #f8f9fa; /* light neutral */ border: 2px solid @(isPastDeadline ? "#dc3545" : isNearDeadline ? "#ffc107" : "#ced4da");">
+                            <div class="card task-card mb-3">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
@@ -236,21 +320,24 @@
                                         </div>
                                     </div>
 
-                                    <div class="task-buttons mt-3">
+                                    <div class="task-buttons mt-3 d-flex gap-2">
                                         <button type="button"
-                                                @onclick="() => Start(task.intTaskID)"
-                                                class="btn btn-sm btn-dark me-2"
-                                                title="Start">
-                                            ▶
+                                        @onclick="() => Start(task.intTaskID)"
+                                        class="btn btn-sm btn-outline-success d-flex justify-content-center align-items-center"
+                                        title="Start"
+                                        style="width: 36px; height: 36px; border-radius: 6px;">
+                                            <i class="bi bi-play-fill"></i>
                                         </button>
 
                                         <button type="button"
-                                                @onclick="() => Change(task.intTaskID, 3)"
-                                                class="btn btn-sm btn-secondary"
-                                                title="On Hold">
-                                            ⏸
+                                        @onclick="() => Change(task.intTaskID, 3)"
+                                        class="btn btn-sm btn-outline-warning d-flex justify-content-center align-items-center"
+                                        title="Awaiting Action"
+                                        style="width: 36px; height: 36px; border-radius: 6px;">
+                                            <i class="bi bi-pause-fill"></i>
                                         </button>
                                     </div>
+
                                 </div>
                             </div>
                         }
@@ -265,7 +352,7 @@
         <div class="col-md-3">
             <div class="card kanban-column">
                 <div class="card-header bg-warning text-white text-center">
-                    <h3>On Hold <span>@(OnHold != null ? $"({OnHold.Count()})" : "(0)")</span></h3>
+                    <h3>Awaiting Action <span>@(OnHold != null ? $"({OnHold.Count()})" : "(0)")</span></h3>
                 </div>
                 <div class="card-body">
                     @if (OnHold != null && OnHold.Any())
@@ -286,10 +373,7 @@
                                 _ => ""
                             };
 
-                            <div class="card task-card mb-3"
-                                 style="background-color: #f8f9fa;
-            border: 2px solid @(isPastDeadline ? "#dc3545" : isNearDeadline ? "#ffc107" : "#ced4da");
-                    ">
+                            <div class="card task-card mb-3">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
@@ -319,20 +403,20 @@
                                             </span>
                                         </div>
                                     </div>
-
-                                    <div class="task-buttons mt-3">
+                                    <div class="task-buttons mt-3 d-flex gap-2">
                                         <button type="button"
-                                                @onclick="() => Start(task.intTaskID)"
-                                                class="btn btn-sm btn-dark me-2"
-                                                title="Start">
-                                            ▶
+                                        @onclick="() => Start(task.intTaskID)"
+                                        class="btn btn-sm btn-outline-success d-flex justify-content-center align-items-center"
+                                        title="Start"
+                                        style="width: 36px; height: 36px; border-radius: 6px;">
+                                            <i class="bi bi-play-fill"></i>
                                         </button>
-
                                         <button type="button"
-                                                @onclick="() => Change(task.intTaskID, 2)"
-                                                class="btn btn-sm btn-light"
-                                                title="Move to To Do">
-                                            📝
+                                        @onclick="() => Change(task.intTaskID, 2)"
+                                        class="btn btn-sm btn-outline-primary d-flex justify-content-center align-items-center"
+                                        title="Move to Queue"
+                                        style="width: 36px; height: 36px; border-radius: 6px;">
+                                            <i class="bi bi-journal-text"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -350,7 +434,7 @@
         <div class="col-md-3">
             <div class="card kanban-column">
                 <div class="card-header bg-info text-white text-center">
-                    <h3>In Review <span>@(InReview != null ? $"({InReview.Count()})" : "(0)")</span></h3>
+                    <h3>Evaluation <span>@(InReview != null ? $"({InReview.Count()})" : "(0)")</span></h3>
                 </div>
                 <div class="card-body">
                     @if (InReview != null && InReview.Any())
@@ -371,8 +455,7 @@
                                 _ => ""
                             };
 
-                            <div class="card task-card mb-3"
-                                 style=" background-color: #f8f9fa; border: 2px solid @(isPastDeadline ? "#dc3545" : isNearDeadline ? "#ffc107" : "#ced4da");">
+                            <div class="card task-card mb-3">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
@@ -403,20 +486,22 @@
                                         </div>
                                     </div>
 
-                                    <div class="task-buttons mt-3">
+                                    <div class="task-buttons mt-3 d-flex gap-2">
                                         <button type="button"
-                                                @onclick="() => Start(task.intTaskID)"
-                                                class="btn btn-sm btn-dark me-2"
-                                                title="Start">
-                                            ▶
+                                        @onclick="() => Start(task.intTaskID)"
+                                        class="btn btn-sm btn-outline-success d-flex justify-content-center align-items-center"
+                                        title="Start"
+                                        style="width: 36px; height: 36px; border-radius: 6px;">
+                                            <i class="bi bi-play-fill"></i>
+                                        </button>
+                                        <button type="button"
+                                        @onclick="() => Change(task.intTaskID, 5)"
+                                        class="btn btn-sm btn-outline-success d-flex justify-content-center align-items-center"
+                                        title="Complete"
+                                        style="width: 36px; height: 36px; border-radius: 6px;">
+                                            <i class="bi bi-check2-circle"></i>
                                         </button>
 
-                                        <button type="button"
-                                                @onclick="() => Change(task.intTaskID, 5)"
-                                                class="btn btn-sm btn-success"
-                                                title="Complete">
-                                            ✅
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -433,7 +518,7 @@
         <div class="col-md-3">
             <div class="card kanban-column">
                 <div class="card-header bg-success text-white text-center">
-                    <h3>Compete <span>@(Compete != null ? $"({Compete.Count()})" : "(0)")</span></h3>
+                    <h3>Complete <span>@(Compete != null ? $"({Compete.Count()})" : "(0)")</span></h3>
                 </div>
                 <div class="card-body">
                     @if (Compete != null && Compete.Any())
@@ -611,16 +696,25 @@
     }
     public async Task TaskAction(int Type, int TaskID, int User, int Status, TimeSpan time)
     {
-        string output = await task.TaskManage(Type, TaskID, User, Status, time, session.UserID);
-        if (output.Contains("Success"))
+        bool confirmed = true;
+        if (Status == 6)
         {
-            await Tost.Success("Success", output, true);
+            confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this task?");
+            
         }
-        else
+        if (confirmed)
         {
-            await Tost.Error("Error", output, true);
+            string output = await task.TaskManage(Type, TaskID, User, Status, time, session.UserID);
+            if (output.Contains("Success"))
+            {
+                await Tost.Success("Success", output, true);
+            }
+            else
+            {
+                await Tost.Error("Error", output, true);
+            }
+            load();
         }
-        load();
     }
     public void ToggleTextbox()
     {
