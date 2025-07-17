@@ -237,5 +237,20 @@ namespace ProjectManagement.Services.TaskM
                 return null;
             }
         }
+        public async Task<string> TaskUpdate(Tasks t, int USerID)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<string>($"api/Task/TaskUpdate?Task={t.intTaskID}&TaskName={t.strTaskName}&Description={t.strDescription}&RequestFrom={t.strRequestFrom}&Priroty={t.intPriroty}&DeadLine={t.dteDeadLine}&USerID={USerID}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

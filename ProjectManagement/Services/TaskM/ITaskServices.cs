@@ -18,5 +18,7 @@ namespace ProjectManagement.Services.TaskM
         Task<List<Notify>> GetNotify(int User);
         Task<List<PendingTask>> GetPendingTasks(int Enroll);
         Task<Tasks> GetTask(int TaskID);
+        Task<string> TaskUpdate(Tasks task, int USerID);
+
     }
 }

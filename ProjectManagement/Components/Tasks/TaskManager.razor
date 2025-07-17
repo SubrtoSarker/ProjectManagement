@@ -74,23 +74,100 @@
                 <div class="card-header text-center bg-secondary text-black">
                     <h5>In Progress</h5>
                 </div>
+
                 <div class="card-body">
-                    <h2 class="text-center">@Current.strTaskName</h2>
-                    <p class="fw-bold text-muted">Requested by: @Current.strRequestFrom</p>
-                    <p class="fw-bold text-muted">Project: @Current.strProjectName</p>
-                    <hr>
+                    <!-- Editable Task Name -->
+                    <h2 class="text-center">
+                        @if (isEditing)
+                        {
+                            <input class="form-control form-control-sm text-center mx-auto"
+                            style="max-width: 400px;"
+                            @bind="Current.strTaskName" />
+                        }
+                        else
+                        {
+                            @Current.strTaskName
+                        }
+                    </h2>
+
+                    <!-- Requested By -->
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="fw-bold text-muted me-2">Requested by:</span>
+                        @if (isEditing)
+                        {
+                            <input class="form-control form-control-sm w-auto" @bind="Current.strRequestFrom" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">@Current.strRequestFrom</span>
+                        }
+                    </div>
+
+                    <!-- Project Name -->
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="fw-bold text-muted me-2">Project:</span>
+                        @if (isEditing)
+                        {
+                            <input class="form-control form-control-sm w-auto" @bind="Current.strProjectName" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">@Current.strProjectName</span>
+                        }
+                    </div>
+
+                    <hr />
+
+                    <!-- Description -->
                     <p class="fw-bold">Description:</p>
-                    <p>@Current.strDescription</p>
-                    <p>
-                        Due Date: @Current.dteDeadLine.ToString("dd MMM")
-                        <span class="ms-3">
-                            Priority: <span class="badge bg-@GetPriorityBadge(Current.intPriroty)">
+                    @if (isEditing)
+                    {
+                        <textarea class="form-control form-control-sm" rows="3" @bind="Current.strDescription"></textarea>
+                    }
+                    else
+                    {
+                        <p>@Current.strDescription</p>
+                    }
+
+                    <!-- Due Date & Priority -->
+                    <div class="d-flex flex-wrap align-items-center mb-2 mt-3">
+                        <span class="fw-bold text-muted me-2">Due Date:</span>
+                        @if (isEditing)
+                        {
+                            <InputDate @bind-Value="Current.dteDeadLine"
+                            class="form-control form-control-sm me-3"
+                            style="width: auto;"
+                            min="@DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd")" />
+                        }
+                        else
+                        {
+                            <span class="me-3">@Current.dteDeadLine.ToString("dd MMM")</span>
+                        }
+
+                        <span class="fw-bold text-muted me-2">Priority:</span>
+                        @if (isEditing)
+                        {
+                            <InputSelect @bind-Value="Current.intPriroty"
+                            class="form-select form-select-sm"
+                            style="width: auto;">
+                                @foreach (TaskPriority priority in Enum.GetValues(typeof(TaskPriority)))
+                                {
+                                    <option value="@((int)priority)">@priority</option>
+                                }
+                            </InputSelect>
+                        }
+                        else
+                        {
+                            <span class="badge bg-@GetPriorityBadge(Current.intPriroty)">
                                 @((TaskPriority)Current.intPriroty)
                             </span>
-                        </span>
-                    </p>
-                    <hr>
-                    <p class="fw-bold">Steps:</p>
+                        }
+                    </div>
+
+                    <hr />
+
+                    <!-- Steps -->
+                    <p class="fw-bold">Steps: <span>@(Steps != null ? $"({Steps.Count()})" : "(0)")</span></p>
                     @if (Steps != null && Steps.Any())
                     {
                         <ul class="list-group">
@@ -99,12 +176,14 @@
                                 <li class="list-group-item">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <label class="form-check-label flex-grow-1" for="@($"checkbox-{step.intStepId}")">@step.strStep</label>
-
                                         <div class="form-check form-switch me-3">
-                                            <input class="form-check-input" type="checkbox" id="@($"checkbox-{step.intStepId}")" checked="@step.isDone" @onchange="() => UpdateStepSatatus(step.intStepId, step.isDone)" />
+                                            <input class="form-check-input"
+                                            type="checkbox"
+                                            id="@($"checkbox-{step.intStepId}")"
+                                            checked="@step.isDone"
+                                            @onchange="() => UpdateStepSatatus(step.intStepId, step.isDone)" />
                                             <label class="form-check-label" for="@($"checkbox-{step.intStepId}")">Done</label>
                                         </div>
-
                                         <button class="btn btn-primary"
                                         @onclick="() => SetStep(step.strStep, step.intStepId)"
                                         data-bs-toggle="modal"
@@ -113,7 +192,6 @@
                                         </button>
                                     </div>
                                 </li>
-
                             }
                         </ul>
                     }
@@ -127,9 +205,9 @@
                             @onclick="ToggleTextbox">
                                 <i class="bi bi-plus"></i>
                             </button>
-
                         </div>
                     }
+
                     @if (showTextbox)
                     {
                         <div class="mt-3">
@@ -144,13 +222,15 @@
                             </EditForm>
                         </div>
                     }
-                    <hr>
 
-                    <div class="mt-3 d-flex flex-wrap align-items-center gap-2">
+                    <hr />
 
-                        <div class="d-flex flex-wrap gap-2 mt-3">
+                    <!-- Footer Controls -->
+                    <div class="mt-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
 
-                            <!-- Pause / Resume Button -->
+                        <!-- Left Buttons -->
+                        <div class="d-flex flex-wrap gap-2">
+                            <!-- Pause / Resume -->
                             <button class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center"
                             style="width: 40px; height: 36px; border-radius: 6px;"
                             title="@(isPaused ? "Resume" : "Pause")"
@@ -158,11 +238,9 @@
                                 <i class="bi @(isPaused ? "bi-play-fill text-success" : "bi-pause-fill text-warning")"></i>
                             </button>
 
-
-
+                            <!-- Transfer -->
                             @if (session.TeamID > 1)
                             {
-                                <!-- Transfer Button -->
                                 <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center"
                                 data-bs-toggle="modal"
                                 data-bs-target="#TranferModal"
@@ -174,89 +252,99 @@
                                 </button>
                             }
 
-                            <!-- Sync Button -->
-                            <button type="button"
-                            class="btn btn-sm btn-outline-info d-flex justify-content-center align-items-center"
-                            title="Sync"
+                            <!-- Sync -->
+                            <button class="btn btn-sm btn-outline-info d-flex align-items-center justify-content-center"
                             style="width: 40px; height: 36px; border-radius: 6px;"
+                            title="Sync"
                             @onclick="Sync">
                                 <i class="bi bi-arrow-repeat"></i>
                             </button>
 
+                            <!-- Edit / Save -->
+                            <!-- Edit / Save / Cancel Buttons -->
+                            @if (isEditing)
+                            {
+                                <div class="d-flex gap-2">
+                                    <!-- Save -->
+                                    <button class="btn btn-sm btn-outline-success d-flex align-items-center justify-content-center"
+                                    style="width: 40px; height: 36px; border-radius: 6px;"
+                                    title="Save"
+                                    @onclick="SaveChanges">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+
+                                    <!-- Cancel -->
+                                    <button class="btn btn-sm btn-outline-warning d-flex align-items-center justify-content-center"
+                                    style="width: 40px; height: 36px; border-radius: 6px;"
+                                    title="Cancel"
+                                    @onclick="CancelChanges">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <!-- Edit -->
+                                <button class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 36px; border-radius: 6px;"
+                                title="Edit"
+                                @onclick="EnterEditMode">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            }
+
                         </div>
 
-                        <!-- Action Button -->
-                        @* <button class="btn btn-outline-success d-flex align-items-center justify-content-center"
-                                data-bs-toggle="modal"
-                                data-bs-target="#actionModal"
-                                style="width: 100px; height: 36px; border-radius: 6px;">
-                            Action
-                        </button> *@
-
-                        <div class="task-buttons mt-3 d-flex flex-wrap gap-2 ms-auto">
-
-                            <!-- Move to Queue -->
-                            <button type="button"
-                            class="btn btn-sm btn-outline-primary d-flex justify-content-center align-items-center"
-                            title="Move to Queue"
+                        <!-- Right Buttons -->
+                        <div class="task-buttons d-flex flex-wrap gap-2">
+                            <button class="btn btn-sm btn-outline-primary" title="Move to Queue"
                             style="width: 40px; height: 36px; border-radius: 6px;"
                             @onclick="() => TaskAction(0, Current.intTaskID, 0, 2, elapsedTime)">
                                 <i class="bi bi-journal-text"></i>
                             </button>
 
-                            <!-- Awaiting Action -->
-                            <button type="button"
-                            class="btn btn-sm btn-outline-warning d-flex justify-content-center align-items-center"
-                            title="Awaiting Action"
+                            <button class="btn btn-sm btn-outline-warning" title="Awaiting Action"
                             style="width: 40px; height: 36px; border-radius: 6px;"
                             @onclick="() => TaskAction(0, Current.intTaskID, 0, 3, elapsedTime)">
                                 <i class="bi bi-pause-fill"></i>
                             </button>
 
-                            <!-- Evaluation -->
-                            <button type="button"
-                            class="btn btn-sm btn-outline-info d-flex justify-content-center align-items-center"
-                            title="Evaluation"
+                            <button class="btn btn-sm btn-outline-info" title="Evaluation"
                             style="width: 40px; height: 36px; border-radius: 6px;"
                             data-bs-dismiss="modal"
                             @onclick="() => TaskAction(0, Current.intTaskID, 0, 4, elapsedTime)">
                                 <i class="bi bi-eye"></i>
                             </button>
 
-                            <!-- Complete -->
-                            <button type="button"
-                            class="btn btn-sm btn-outline-success d-flex justify-content-center align-items-center"
-                            title="Complete"
+                            <button class="btn btn-sm btn-outline-success" title="Complete"
                             style="width: 40px; height: 36px; border-radius: 6px;"
                             data-bs-dismiss="modal"
                             @onclick="() => TaskAction(0, Current.intTaskID, 0, 5, elapsedTime)">
                                 <i class="bi bi-check2"></i>
                             </button>
 
-                            <!-- Delete -->
-                            <button type="button"
-                            class="btn btn-sm btn-outline-danger d-flex justify-content-center align-items-center"
-                            title="Delete"
+                            <button class="btn btn-sm btn-outline-danger" title="Delete"
                             style="width: 40px; height: 36px; border-radius: 6px;"
                             data-bs-dismiss="modal"
                             @onclick="() => TaskAction(0, Current.intTaskID, 0, 6, elapsedTime)">
                                 <i class="bi bi-x-circle"></i>
                             </button>
-
                         </div>
-
                     </div>
 
                 </div>
+
+                <!-- Card Footer with Session Info -->
                 <div class="card-footer d-flex justify-content-between">
                     <div>
-                        <p class="fw-bold">Previous Session: @PreviouSession.ToString(@"hh\:mm\:ss")</p>
+                        <p class="fw-bold mb-0">Previous Session: @PreviouSession.ToString(@"hh\:mm\:ss")</p>
                     </div>
                     <div>
-                        <p class="fw-bold">Current Working Time: @elapsedTime.ToString(@"hh\:mm\:ss")</p>
+                        <p class="fw-bold mb-0">Current Working Time: @elapsedTime.ToString(@"hh\:mm\:ss")</p>
                     </div>
                 </div>
             </div>
+
         }
 
     </div>
@@ -700,7 +788,10 @@
         if (Status == 6)
         {
             confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this task?");
-            
+        }
+        else if (Status == 5)
+        {
+            confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to complete  this task?");
         }
         if (confirmed)
         {
@@ -907,5 +998,31 @@
     public void Dispose()
     {
         timer?.Dispose();
+    }
+    private bool isEditing = false;
+    private void EnterEditMode()
+    {
+        isEditing = true;
+    }
+
+    private async Task SaveChanges()
+    {
+        string output = await task.TaskUpdate(Current, session.UserID);
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+        Current = await task.GetCurrentTasks(session.UserID);
+        isEditing = false;
+    }
+
+    private async void CancelChanges()
+    {
+        Current = await task.GetCurrentTasks(session.UserID);
+        isEditing = false;
     }
 }
