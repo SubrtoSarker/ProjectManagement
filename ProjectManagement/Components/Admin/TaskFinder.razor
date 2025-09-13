@@ -29,6 +29,16 @@
                     <hr>
                     <p class="fw-bold">Description:</p>
                     <p>@Current.strDescription</p>
+                    <!-- Due Date & Priority -->
+                    <div class="d-flex flex-wrap align-items-center mb-2 mt-3">
+                        <span class="fw-bold text-muted me-2">Due Date:</span>
+                        <span class="me-3">@Current.dteDeadLine.ToString("dd MMM")</span>
+
+                        <span class="fw-bold text-muted me-2">Priority:</span>
+                        <span class="badge bg-@GetPriorityBadge(Current.intPriroty)">
+                            @((TaskPriority)Current.intPriroty)
+                        </span>
+                    </div>
                     <hr>
                     <p class="fw-bold">Steps:</p>
                     @if (Steps != null && Steps.Any())
@@ -215,6 +225,17 @@
         customEndDate = DateTime.Today;
         customStartDate = customEndDate.AddMonths(-1);
         StateHasChanged();
+    }
+    private string GetPriorityBadge(int priority)
+    {
+        return priority switch
+        {
+            4 => "danger",   // Critical (red)
+            3 => "warning",  // High (orange/yellow)
+            2 => "info",     // Medium (blue)
+            1 => "success",  // Low (green)
+            _ => "secondary" // Default (gray)
+        };
     }
     private async Task SubmitReport()
     {

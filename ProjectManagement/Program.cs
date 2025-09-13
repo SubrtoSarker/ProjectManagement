@@ -28,7 +28,7 @@ builder.Services.AddRazorComponents()
 
 // Add Bootstrap Blazor
 builder.Services.AddBootstrapBlazor();
-builder.Services.AddSingleton<ToastService>();
+builder.Services.AddScoped<ToastService>();
 
 // Register services
 builder.Services.AddSingleton<WeatherForecastService>();
