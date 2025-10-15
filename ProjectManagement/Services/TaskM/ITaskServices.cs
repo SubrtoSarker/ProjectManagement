@@ -1,4 +1,5 @@
-﻿using ProjectManagement.Models.Task;
+﻿using ProjectManagement.Models.Admin;
+using ProjectManagement.Models.Task;
 
 namespace ProjectManagement.Services.TaskM
 {
@@ -19,6 +20,7 @@ namespace ProjectManagement.Services.TaskM
         Task<List<PendingTask>> GetPendingTasks(int Enroll);
         Task<Tasks> GetTask(int TaskID);
         Task<string> TaskUpdate(Tasks task, int USerID);
+        Task<List<CompleatedReport>> CompleatedReport(DateTime From, DateTime To, int Enroll);
 
     }
 }

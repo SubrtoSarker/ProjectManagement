@@ -1,4 +1,5 @@
 ﻿using ProjectManagement.Models.Admin;
+using ProjectManagement.Models.Task;
 
 namespace ProjectManagement.Services.Admin
 {
@@ -10,5 +11,8 @@ namespace ProjectManagement.Services.Admin
         Task<string> Create(string Name, int Enroll);
         Task<List<DateWiseReport>> GetTeamReport(int Enroll, DateTime From, DateTime To);
         Task<List<CompleatedReport>> CompleatedReport( DateTime From, DateTime To);
+        Task<List<PendingTask>> GetPendingTasks(int Enroll);
+        Task<List<Performance>> GetPerFormance(DateTime From, DateTime To, int User, int Project);
+
     }
 }

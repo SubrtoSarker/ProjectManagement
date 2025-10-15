@@ -45,6 +45,8 @@ namespace ProjectManagement.Components.Shared
                 new() { Text = "Team Progress Report", Icon = "fa-solid fa-chart-area", Url = "/TeamReport" },
                 new() { Text = "Users", Icon = "fa-solid fa-fw fa-users-cog", Url = "/User" },
                 new() { Text = "Task Detail", Icon = "fa-solid fa-fw fa-magnifying-glass", Url = "/TaskDetail" },
+                new() { Text = "My Task", Icon = "fa-solid fa-fw fa-magnifying-glass", Url = "/MyTask" },
+
 
 
                 new() { Text = "Test", Icon = "fa-solid fa-vial", Url = "/Test" },
@@ -63,6 +65,7 @@ namespace ProjectManagement.Components.Shared
                 new() { Text = "Home", Icon = "fa-solid fa-fw fa-home", Url = "/Home", Match = NavLinkMatch.All },
                 new() { Text = "Tasks", Icon = "fa-solid fa-fw fa-tasks", Url = "/Task" },
                 new() { Text = "Progress Report", Icon = "fa-solid fa-fw fa-chart-line", Url = "/PersonalReport" },
+                new() { Text = "My Task", Icon = "fa-solid fa-fw fa-magnifying-glass", Url = "/MyTask" },
             };
 
             if (displayAccount == "Super Admin")

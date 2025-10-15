@@ -1,5 +1,6 @@
 ﻿using Blazored.SessionStorage;
 using ProjectManagement.Models.Admin;
+using ProjectManagement.Models.Task;
 using ProjectManagement.Services.Session;
 using System.Net.Http.Headers;
 
@@ -105,6 +106,36 @@ namespace ProjectManagement.Services.Admin
             {
                 await SetAuthorizationHeader();
                 var result = await _httpClient.GetFromJsonAsync<List<CompleatedReport>>($"api/Admin/GetCompleatedReport?From={From}&To={To}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
+        public async Task<List<PendingTask>> GetPendingTasks(int Enroll)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<List<PendingTask>>($"api/Admin/GetPendingTasks?Enroll={Enroll}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
+        public async Task<List<Performance>> GetPerFormance(DateTime From, DateTime To, int User, int Project)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<List<Performance>>($"api/Admin/GetPerFormance?From={From}&To={To}&User={User}&Project={Project}");
                 return result;
             }
             catch (Exception ex)

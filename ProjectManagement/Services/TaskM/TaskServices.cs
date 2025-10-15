@@ -252,5 +252,20 @@ namespace ProjectManagement.Services.TaskM
                 return null;
             }
         }
+        public async Task<List<CompleatedReport>> CompleatedReport(DateTime From, DateTime To, int Enroll)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var result = await _httpClient.GetFromJsonAsync<List<CompleatedReport>>($"api/Task/GetCompleatedReport?From={From}&To={To}&Enroll={Enroll}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

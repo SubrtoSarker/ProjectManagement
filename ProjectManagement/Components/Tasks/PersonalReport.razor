@@ -85,12 +85,10 @@
 </div>
 @if (Performance.Count > 0)
 {
-    @* <button class="btn btn-secondary" @onclick="PrintChartDiv">Print</button> *@
     <button class="btn btn-primary" @onclick="ExportToExcel">Export to Excel</button>
 }
 @if (PendingTasks.Count > 0)
 {
-    @* <button class="btn btn-secondary" @onclick="PrintChartDiv">Print</button> *@
     <button class="btn btn-primary ms-2" @onclick="Export">Pending Task</button>
 }
 
@@ -244,7 +242,7 @@
                 worksheet.Cell(1, 1).Value = "Performance Summary Report";
                 worksheet.Cell(1, 1).Style.Font.Bold = true;
                 worksheet.Cell(1, 1).Style.Font.FontSize = 16;
-                worksheet.Range(1, 1, 1, 8).Merge(); // Merge cells A1 to H1
+                worksheet.Range(1, 1, 1, 9).Merge(); // Merge cells A1 to H1
                 worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                 //worksheet.Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
 
@@ -262,6 +260,7 @@
                 worksheet.Cell(2, 6).Value = "Request From";
                 worksheet.Cell(2, 7).Value = "Project Name";
                 worksheet.Cell(2, 8).Value = "Working Time";
+                worksheet.Cell(2, 9).Value = "Percent";
 
                 // Add data starting from the third row
                 for (int i = 0; i < Performance.Count; i++)
@@ -274,10 +273,11 @@
                     worksheet.Cell(i + 3, 6).Value = Performance[i].strRequestFrom;
                     worksheet.Cell(i + 3, 7).Value = Performance[i].strProjectName;
                     worksheet.Cell(i + 3, 8).Value = Performance[i].tmWorking.ToString();
+                    worksheet.Cell(i + 3, 9).Value = Performance[i].WorkPercent.ToString();
                 }
 
                 // Create a table from the data range without filters
-                var dataRange = worksheet.Range(2, 1, Performance.Count + 2, 8);
+                var dataRange = worksheet.Range(2, 1, Performance.Count + 2, 9);
                 var table = dataRange.CreateTable();
                 table.ShowAutoFilter = false; // Disable filtering
 

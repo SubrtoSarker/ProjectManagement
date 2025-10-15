@@ -1,0 +1,258 @@
+﻿@page "/MyTask"
+@attribute [TabItemOption(Text = "My Task")]
+@using Models.Admin;
+@using ProjectManagement.Models.ProjectModel
+@using ProjectManagement.Services.Session
+@using ProjectManagement.Services.TaskM
+@* @using Services; *@
+@using NetcodeHub.Packages.Components.Validations.OnInput;
+@using ProjectManagement.Models.Task
+@* inject IAdminServices admin; *@
+@inject ITaskServices task;
+@inject IJSRuntime JSRuntime
+@inject ToastService Tost
+@inject Blazored.SessionStorage.ISessionStorageService sess
+@inject ITaskServices task
+<PageTitle>Task Detail</PageTitle>
+<h3>Task Detail</h3>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        @if (Current != null)
+        {
+            <div class="card">
+                <div class="card-header text-center bg-secondary text-black">
+                    <h5>Details</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="text-center">@Current.strTaskName</h2>
+                    <p class="fw-bold text-muted">Requested by: @Current.strRequestFrom</p>
+                    <p class="fw-bold text-muted">Project: @Current.strProjectName</p>
+                    <hr>
+                    <p class="fw-bold">Description:</p>
+                    <p>@Current.strDescription</p>
+                    <!-- Due Date & Priority -->
+                    <div class="d-flex flex-wrap align-items-center mb-2 mt-3">
+                        <span class="fw-bold text-muted me-2">Due Date:</span>
+                        <span class="me-3">@Current.dteDeadLine.ToString("dd MMM")</span>
+
+                        <span class="fw-bold text-muted me-2">Priority:</span>
+                        <span class="badge bg-@GetPriorityBadge(Current.intPriroty)">
+                            @((TaskPriority)Current.intPriroty)
+                        </span>
+                    </div>
+                    <hr>
+                    <p class="fw-bold">Steps:</p>
+                    @if (Steps != null && Steps.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var step in Steps)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <label class="form-check-label flex-grow-1" for="@($"checkbox-{step.intStepId}")">@step.strStep</label>
+
+                                        <div class="form-check form-switch me-3">
+                                            <input class="form-check-input" type="checkbox" disabled="disabled" id="@($"checkbox-{step.intStepId}")" checked="@step.isDone" />
+                                            <label class="form-check-label" for="@($"checkbox-{step.intStepId}")">Done</label>
+                                        </div>
+                                    </div>
+                                </li>
+
+                            }
+                        </ul>
+                    }
+                    <hr>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <div>
+                        <p class="fw-bold">Previous Session: @PreviouSession.ToString(@"hh\:mm\:ss")</p>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <hr />
+        }
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-2 mb-3">
+        <label for="startDate" class="form-label">Start Date:</label>
+        <input type="date" id="startDate" class="form-control" @bind="customStartDate" />
+    </div>
+    <div class="col-md-2 mb-3">
+        <label for="endDate" class="form-label">End Date:</label>
+        <input type="date" id="endDate" class="form-control" @bind="customEndDate" />
+    </div>
+    <div class="col-md-2 mb-3 align-self-end">
+        <button class="btn btn-primary" @onclick="SubmitReport">Show</button>
+    </div>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        <br />
+        @if (CR.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered align-middle">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>Task ID</th>
+                            <th>Task Name</th>
+                            <th>Description</th>
+                            <th>Request From</th>
+                            <th>Project Name</th>
+                            <th>User Name</th>
+                            <th>Team Name</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in CR)
+                        {
+                            <tr class="text-center">
+                                <td>@request.intTaskID</td>
+                                <td>@request.strTaskName</td>
+                                <td>@request.strDescription</td>
+                                <td>@request.strRequestFrom</td>
+                                <td>@request.strProjectName</td>
+                                <td>@request.strUserName</td>
+                                <td>@request.strTeamName</td>
+                                <td>
+                                    <span class="badge @GetStatusBadgeClass(request.strStatus)">
+                                        @request.strStatus
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary"
+                                            @onclick="() => GetTaskID(request.intTaskID)"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#actionModal">
+                                        Action
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-center text-muted">No data available.</p>
+        }
+    </div>
+</div>
+<div class="modal fade fade-in-modal" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="actionModalLabel">Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="btn-group d-flex" role="group">
+                    <button class="btn btn-primary flex-fill" data-bs-dismiss="modal" @onclick="() => Action(1)">
+                        <i class="bi bi-arrow-repeat me-2"></i> Re-Open
+                    </button>
+                    <button class="btn btn-info flex-fill" data-bs-dismiss="modal" @onclick="() => Action(2)">
+                        <i class="bi bi-info-circle me-2"></i> Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    private List<Steps> Steps;
+    TimeSpan PreviouSession;
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Completed" => "bg-success",
+            "In Progress" => "bg-warning text-dark",
+            "Pending" => "bg-info",
+            "Remove" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+    private int TaskID = 0;
+    public async void GetTaskID(int Task)
+    {
+        TaskID = Task;
+        StateHasChanged();
+    }
+    public Tasks Current;
+    public async void Action(int Action)
+    {
+        if (Action == 1)
+        {
+            await TaskAction(0, TaskID, 0, 2, new TimeSpan());
+        }
+        else if (Action == 2)
+        {
+            Current = await task.GetTask(TaskID);
+            if (Current != null)
+            {
+                PreviouSession = Current.tmWorking;
+                Steps = await task.GetStepsByTask(Current.intTaskID);
+            }
+            StateHasChanged();
+        }
+    }
+    public async Task TaskAction(int Type, int TaskID, int User, int Status, TimeSpan time)
+    {
+        string output = await task.TaskManage(Type, TaskID, User, Status, time, session.UserID);
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+        await SubmitReport();
+    }
+    public SessionServices session = new SessionServices();
+    private DateTime customStartDate;
+    private DateTime customEndDate;
+    private List<CompleatedReport> CR = new List<CompleatedReport>();
+    protected override async Task OnInitializedAsync()
+    {
+        session = await sess.GetItemAsync<SessionServices>("session");
+        customEndDate = DateTime.Today;
+        customStartDate = customEndDate.AddMonths(-1);
+        StateHasChanged();
+    }
+    private string GetPriorityBadge(int priority)
+    {
+        return priority switch
+        {
+            4 => "danger",   // Critical (red)
+            3 => "warning",  // High (orange/yellow)
+            2 => "info",     // Medium (blue)
+            1 => "success",  // Low (green)
+            _ => "secondary" // Default (gray)
+        };
+    }
+    private async Task SubmitReport()
+    {
+        try
+        {
+            if (customStartDate == DateTime.MinValue || customEndDate == DateTime.MinValue)
+            {
+                await Tost.Warning("Please select valid start and end dates for the custom report.");
+                return;
+            }
+            CR = await task.CompleatedReport(customStartDate, customEndDate, session.UserID);
+        }
+        catch (Exception ex)
+        {
+            await Tost.Error(ex.Message);
+        }
+        StateHasChanged();
+    }
+}

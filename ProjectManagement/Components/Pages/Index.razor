@@ -423,7 +423,10 @@
             {
                 await Toast.Error("Error", output, true);
             }
-            newTask = new TaskCreate();
+            newTask = new TaskCreate()
+            {
+                DeadLine = DateOnly.FromDateTime(DateTime.Today)
+            };
             load();
         }
         else
@@ -458,7 +461,10 @@
             await Toast.Error("Error", output, true);
         }
         load();
-        newTask = new TaskCreate();
+        newTask = new TaskCreate()
+        {
+            DeadLine = DateOnly.FromDateTime(DateTime.Today)
+        };
         StateHasChanged();
     }
     public async void RequestAction(int Action)

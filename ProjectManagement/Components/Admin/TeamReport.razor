@@ -85,6 +85,15 @@
         <button class="btn btn-primary" @onclick="SubmitReport">Show</button>
     </div>
 </div>
+@if (Performance.Count > 0)
+{
+    @* <button class="btn btn-secondary" @onclick="PrintChartDiv">Print</button> *@
+    <button class="btn btn-primary" @onclick="ExportToExcel">Export to Excel</button>
+}
+@if (PendingTasks.Count > 0)
+{
+    <button class="btn btn-primary ms-2" @onclick="Export">Pending Task</button>
+}
 <div class="container">
     <div class="row">
         <div class="col-md-12" style="overflow-x: auto;">
@@ -93,6 +102,12 @@
     </div>
 </div>
 @code {
+
+
+    private List<Performance> Performance = new List<Performance>();
+    private List<PendingTask> PendingTasks = new List<PendingTask>();
+
+
     public SessionServices session = new SessionServices();
     public List<DateWiseReport> Team = new List<DateWiseReport>();
     public async void Load()
@@ -104,7 +119,7 @@
     }
     private int selectedProject;
     private string selectedReportType = "Daily";
-    private string selectedDate;
+    private string selectedDate = "";
     private DateTime customStartDate;
     private DateTime customEndDate;
     private DateTime customDate;
@@ -209,6 +224,8 @@
                 To = DateTime.Now;
             }
             Team = await admin.GetTeamReport(session.UserID, From, To);
+            PendingTasks = await admin.GetPendingTasks(session.UserID);
+            Performance = await admin.GetPerFormance(From, To, session.UserID, selectedProject);
             await ShowLineChart();
 
         }
@@ -222,6 +239,162 @@
     {
         var jsonData = JsonSerializer.Serialize(Team);
         await JSRuntime.InvokeVoidAsync("createLineChart", jsonData);
+    }
+    private async Task Export()
+    {
+        try
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Performance Data");
+
+                // Add a title to the report
+                worksheet.Cell(1, 1).Value = "Pending Task Report";
+                worksheet.Cell(1, 1).Style.Font.Bold = true;
+                worksheet.Cell(1, 1).Style.Font.FontSize = 16;
+                worksheet.Range(1, 1, 1, 11).Merge(); // Merge cells A1 to H1
+                worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                //worksheet.Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
+
+                // Add headers starting from the second row
+                var headerRange = worksheet.Range(2, 1, 2, 11);
+                headerRange.Style.Font.Bold = true;
+                //headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                //headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                worksheet.Cell(2, 1).Value = "Task ID";
+                worksheet.Cell(2, 2).Value = "Project Name";
+                worksheet.Cell(2, 3).Value = "Task Name";
+                worksheet.Cell(2, 4).Value = "Description";
+                worksheet.Cell(2, 5).Value = "Status";
+                worksheet.Cell(2, 6).Value = "Working Time";
+                worksheet.Cell(2, 7).Value = "Created Date";
+                worksheet.Cell(2, 8).Value = "DueDate";
+                worksheet.Cell(2, 9).Value = "Priority";
+                worksheet.Cell(2, 10).Value = "Request By";
+                worksheet.Cell(2, 11).Value = "Assigned To";
+
+
+                // Add data starting from the third row
+                for (int i = 0; i < PendingTasks.Count; i++)
+                {
+                    worksheet.Cell(i + 3, 1).Value = PendingTasks[i].intTaskID;
+                    worksheet.Cell(i + 3, 2).Value = PendingTasks[i].strProjectName;
+                    worksheet.Cell(i + 3, 3).Value = PendingTasks[i].strTaskName;
+                    worksheet.Cell(i + 3, 4).Value = PendingTasks[i].strDescription;
+                    worksheet.Cell(i + 3, 5).Value = PendingTasks[i].strStatus;
+                    worksheet.Cell(i + 3, 6).Value = PendingTasks[i].tmWorking.ToString();
+                    worksheet.Cell(i + 3, 7).Value = PendingTasks[i].dteCreated.ToString();
+                    worksheet.Cell(i + 3, 8).Value = PendingTasks[i].dteDeadLine.ToString();
+                    worksheet.Cell(i + 3, 9).Value = ((TaskPriority)PendingTasks[i].intPriroty).ToString();
+                    worksheet.Cell(i + 3, 10).Value = PendingTasks[i].strRequestFrom.ToString();
+                    worksheet.Cell(i + 3, 11).Value = PendingTasks[i].AssignedTo.ToString();
+
+                }
+
+                // Create a table from the data range without filters
+                var dataRange = worksheet.Range(2, 1, PendingTasks.Count + 2, 11);
+                var table = dataRange.CreateTable();
+                table.ShowAutoFilter = false; // Disable filtering
+
+                // Auto-fit columns
+                foreach (var column in worksheet.ColumnsUsed())
+                {
+                    if (column.ColumnNumber() != 4)
+                    {
+                        column.AdjustToContents();
+                    }
+                }
+
+                // Convert the workbook to a byte array
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var fileContents = stream.ToArray();
+                    var fileName = $"TeamPendingTaskReport.xlsx";
+                    await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(fileContents));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await Tost.Error(ex.Message);
+        }
+
+    }
+    private async Task ExportToExcel()
+    {
+        try
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Performance Data");
+
+                // Add a title to the report
+                worksheet.Cell(1, 1).Value = "Performance Summary Report";
+                worksheet.Cell(1, 1).Style.Font.Bold = true;
+                worksheet.Cell(1, 1).Style.Font.FontSize = 16;
+                worksheet.Range(1, 1, 1, 11).Merge(); // Merge cells A1 to H1
+                worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                //worksheet.Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
+
+                // Add headers starting from the second row
+                var headerRange = worksheet.Range(2, 1, 2, 11);
+                headerRange.Style.Font.Bold = true;
+                //headerRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                //headerRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                worksheet.Cell(2, 1).Value = "Count"; // Row number column
+                worksheet.Cell(2, 2).Value = "From";
+                worksheet.Cell(2, 3).Value = "To";
+                worksheet.Cell(2, 4).Value = "Task Name";
+                worksheet.Cell(2, 5).Value = "Description";
+                worksheet.Cell(2, 6).Value = "Request From";
+                worksheet.Cell(2, 7).Value = "Project Name";
+                worksheet.Cell(2, 8).Value = "Working Time";
+                worksheet.Cell(2, 9).Value = "Percent";
+                worksheet.Cell(2, 10).Value = "Team Percent";
+                worksheet.Cell(2, 11).Value = "Assigned To";
+
+                // Add data starting from the third row
+                for (int i = 0; i < Performance.Count; i++)
+                {
+                    worksheet.Cell(i + 3, 1).Value = (i + 1); // Row number
+                    worksheet.Cell(i + 3, 2).Value = From.ToString("dd-MM-yyyy");
+                    worksheet.Cell(i + 3, 3).Value = To.ToString("dd-MM-yyyy");
+                    worksheet.Cell(i + 3, 4).Value = Performance[i].strTaskName;
+                    worksheet.Cell(i + 3, 5).Value = Performance[i].strDescription;
+                    worksheet.Cell(i + 3, 6).Value = Performance[i].strRequestFrom;
+                    worksheet.Cell(i + 3, 7).Value = Performance[i].strProjectName;
+                    worksheet.Cell(i + 3, 8).Value = Performance[i].tmWorking.ToString();
+                    worksheet.Cell(i + 3, 9).Value = Performance[i].WorkPercent.ToString();
+                    worksheet.Cell(i + 3, 10).Value = Performance[i].TeamWorkPercent.ToString();
+                    worksheet.Cell(i + 3, 11).Value = Performance[i].AssignedTo.ToString();
+                }
+
+                // Create a table from the data range without filters
+                var dataRange = worksheet.Range(2, 1, Performance.Count + 2, 11);
+                var table = dataRange.CreateTable();
+                table.ShowAutoFilter = false; // Disable filtering
+
+                // Auto-fit columns
+                worksheet.Columns().AdjustToContents();
+
+                // Convert the workbook to a byte array
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var fileContents = stream.ToArray();
+                    var fileName = $"PerformanceReport.xlsx";
+                    await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(fileContents));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await Tost.Error(ex.Message);
+        }
+
     }
     // private async Task ExportToExcel()
     // {

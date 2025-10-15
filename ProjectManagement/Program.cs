@@ -38,8 +38,8 @@ builder.Services.AddTableDemoDataService();
 builder.Services.Configure<HubOptions>(options => options.MaximumReceiveMessageSize = 1024 * 1024); // 1MB limit for example
 
 // Register HttpClient services
-var baseAddress = new Uri("https://projectmanager.akijbashir.com/");
-//var baseAddress = new Uri("https://localhost:5164/");
+//var baseAddress = new Uri("https://projectmanager.akijbashir.com/");
+var baseAddress = new Uri("https://localhost:5164/");
 builder.Services.AddHttpClient<IAuthServices, AuthServices>(client => { client.BaseAddress = baseAddress; });
 builder.Services.AddHttpClient<IProjectService, ProjectService>(client => { client.BaseAddress = baseAddress; });
 builder.Services.AddHttpClient<IAdminServices, AdminServices>(client => { client.BaseAddress = baseAddress; });
