@@ -26,12 +26,12 @@ namespace ProjectManagement.Services.Project
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.Key);
             }
         }
-        public async Task<string> AssigneUser(int User, int Project, bool Active, int Enroll)
+        public async Task<string> AssigneUser(int User, int Project, bool Active, bool KeyPerson, int Enroll)
         {
             try
             {
                 await SetAuthorizationHeader();
-                var result = await _httpClient.GetFromJsonAsync<string>($"api/Project/ProjectAssign?User={User}&Project={Project}&Active={Active}&Enroll={Enroll}");
+                var result = await _httpClient.GetFromJsonAsync<string>($"api/Project/ProjectAssign?User={User}&Project={Project}&Active={Active}&KeyPerson={KeyPerson}&Enroll={Enroll}");
                 return result;
             }
             catch (Exception ex)

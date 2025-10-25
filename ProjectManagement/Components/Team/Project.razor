@@ -191,17 +191,20 @@
             </div>
             <div class="modal-body">
                 <div class="row ms-2">
-                    <div class="col-md-10">
+                    <div class="col-md-8">
                         <label class="form-label ms-2">Name</label>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Status</label>
                     </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Key</label>
+                    </div>
                 </div>
                 @foreach (var item in UserPerProject)
                 {
                     <div class="row ms-2 mt-2">
-                        <div class="col-md-10">
+                        <div class="col-md-8">
                             <label class="form-control" for="@item.intUserID">@item.strUserName</label>
                         </div>
                         <div class="col-md-2">
@@ -212,6 +215,16 @@
                             else
                             {
                                 <input type="checkbox" class="form-check" id="@item.intUserID" @bind-value="item.isActive">
+                            }
+                        </div>
+                        <div class="col-md-2">
+                            @if (item.isKeyPerson)
+                            {
+                                <input type="checkbox" class="form-check" id="@item.intUserID" @bind-value="item.isKeyPerson" checked="checked">
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="form-check" id="@item.intUserID" @bind-value="item.isKeyPerson">
                             }
                         </div>
                     </div>
@@ -303,7 +316,7 @@
     {
         foreach (var i in UserPerProject)
         {
-            string output = await project.AssigneUser(i.intUserID, i.intProjectID, i.isActive, session.UserID);
+            string output = await project.AssigneUser(i.intUserID, i.intProjectID, i.isActive, i.isKeyPerson, session.UserID);
             if (output != "Unprocess.")
             {
                 if (output.Contains("Success"))
