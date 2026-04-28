@@ -287,6 +287,16 @@
 
                         </div>
 
+                        <!-- Add Time Request -->
+                        <button class="btn btn-sm btn-outline-dark d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 36px; border-radius: 6px;"
+                                title="Request time adjustment"
+                                data-bs-toggle="modal"
+                                data-bs-target="#TimeRequestModal"
+                                @onclick="OpenTimeRequest">
+                            <i class="bi bi-clock-history"></i>
+                        </button>
+
                         <!-- Right Buttons -->
                         <div class="task-buttons d-flex flex-wrap gap-2">
                             <button class="btn btn-sm btn-outline-primary" title="Move to Queue"
@@ -720,6 +730,66 @@
         </div>
     </div>
 </div>
+<div class="modal fade fade-in-modal" id="TimeRequestModal" tabindex="-1" role="dialog" aria-labelledby="TimeRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="TimeRequestModalLabel">Request Time Adjustment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (Current != null)
+                {
+                    <p class="text-muted mb-3">
+                        <small>For: <strong>@Current.strTaskName</strong></small>
+                    </p>
+
+                    <EditForm Model="@timeRequest" OnValidSubmit="SubmitTimeRequest" novalidate>
+                        <DataAnnotationsValidator />
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">From</label>
+                                <input type="time"
+                                       class="form-control"
+                                       value="@timeRequest.FromTime.ToString("HH:mm")"
+                                       @onchange="@(e => timeRequest.FromTime = TimeOnly.Parse(e.Value?.ToString() ?? "00:00"))" />
+                                <ValidationMessage class="text-danger" For="@(() => timeRequest.FromTime)" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">To</label>
+                                <input type="time"
+                                       class="form-control"
+                                       value="@timeRequest.ToTime.ToString("HH:mm")"
+                                       @onchange="@(e => timeRequest.ToTime = TimeOnly.Parse(e.Value?.ToString() ?? "00:00"))" />
+                                <ValidationMessage class="text-danger" For="@(() => timeRequest.ToTime)" />
+                            </div>
+                        </div>
+
+                        @if (timeRequest.ToTime > timeRequest.FromTime)
+                        {
+                            <p class="text-muted small mb-3">
+                                Duration: <strong>@((timeRequest.ToTime - timeRequest.FromTime).ToString(@"hh\:mm"))</strong>
+                            </p>
+                        }
+
+                        <div class="mb-3">
+                            <label class="form-label">Reason <span class="text-danger">*</span></label>
+                            <InputTextArea class="form-control" rows="3" @bind-Value="timeRequest.Reason"
+                                           placeholder="e.g. Forgot to start timer after morning meeting" />
+                            <ValidationMessage class="text-danger" For="@(() => timeRequest.Reason)" />
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Send Request</button>
+                        </div>
+                    </EditForm>
+                }
+            </div>
+        </div>
+    </div>
+</div>
 @code
 {
     public SessionServices session = new SessionServices();
@@ -1016,5 +1086,50 @@
     {
         Current = await task.GetCurrentTasks(session.UserID);
         isEditing = false;
+    }
+
+    private TimeRequest timeRequest = new TimeRequest();
+
+    private void OpenTimeRequest()
+    {
+        timeRequest = new TimeRequest
+        {
+            intTaskID = Current?.intTaskID ?? 0
+        };
+    }
+
+    private async Task SubmitTimeRequest()
+    {
+        if (timeRequest.ToTime <= timeRequest.FromTime)
+        {
+            await Tost.Warning("Warning", "'To' time must be after 'From' time.", true);
+            return;
+        }
+
+        var duration = timeRequest.ToTime - timeRequest.FromTime;
+
+        // Pick whatever status code makes sense for "pending request" in your system
+        int Current = 1;
+
+        string output = await task.RequestTimeAdjustment(
+            timeRequest.intTaskID,
+            session.UserID,
+            DateTime.Today,
+            Current,
+            duration,
+            timeRequest.FromTime,
+            timeRequest.ToTime,
+            timeRequest.Reason);
+
+        if (output.Contains("Success"))
+        {
+            await Tost.Success("Success", output, true);
+        }
+        else
+        {
+            await Tost.Error("Error", output, true);
+        }
+
+        timeRequest = new TimeRequest();
     }
 }

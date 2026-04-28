@@ -3,6 +3,7 @@ using ProjectManagement.Models.Admin;
 using ProjectManagement.Models.ProjectModel;
 using ProjectManagement.Models.Task;
 using ProjectManagement.Services.Session;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 
@@ -265,6 +266,31 @@ namespace ProjectManagement.Services.TaskM
                 // Log the exception for debugging purposes
                 Console.WriteLine($"An error occurred: {ex.Message}");
                 return null;
+            }
+        }
+        // Implementation
+        public async Task<string> RequestTimeAdjustment(
+            int taskId, int userId, DateTime date, int status,
+            TimeSpan duration, TimeOnly fromTime, TimeOnly toTime, string reason)
+        {
+            try
+            {
+                var url = $"api/Task/RequestForTask" +
+                          $"?TaskID={taskId}" +
+                          $"&UserID={userId}" +
+                          $"&Date={date:yyyy-MM-ddTHH:mm:ss}" +
+                          $"&Status={status}" +
+                          $"&tm={duration:hh\\:mm\\:ss}" +
+                          $"&From={Uri.EscapeDataString(fromTime.ToString("HH:mm"))}" +
+                          $"&To={Uri.EscapeDataString(toTime.ToString("HH:mm"))}" +
+                          $"&Reason={Uri.EscapeDataString(reason)}";
+
+                var response = await _httpClient.GetAsync(url);
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
             }
         }
     }

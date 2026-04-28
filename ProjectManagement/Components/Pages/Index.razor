@@ -202,33 +202,40 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            <th>Action</th>
                             <th>User</th>
                             <th>Type</th>
                             <th>Project</th>
+                            <th>Task</th>
+                            <th>Description</th>
                             <th>Request From</th>
                             <th>Created Date</th>
                             <th>From</th>
                             <th>To</th>
-                            <th>Action</th>
+                            <th>Working Time</th>                            
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var request in TR)
                         {
                             <tr>
+                                <button class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        @onclick="() => GetRequestID(request.intID)"
+                                        data-bs-target="#actionModal">
+                                    Action
+                                </button>
                                 <td>@request.strUserName</td>
                                 <td>@request.Type</td>
                                 <td>@request.strProjectName</td>
+                                <td>@request.strTaskName</td>
+                                <td>@request.strDescription</td>
                                 <td>@request.strRequestFrom</td>
                                 <td>@request.dteCreated.ToString("yyyy-MM-dd")</td>
                                 <td>@request.strFrom</td>
                                 <td>@request.strTo</td>
-                                <button class="btn btn-primary"
-                                data-bs-toggle="modal"
-                                @onclick="() => GetRequestID(request.intID)"
-                                data-bs-target="#actionModal">
-                                    Action
-                                </button>
+                                <td>@request.tmWorking</td>
+                                
                             </tr>
                         }
                     </tbody>

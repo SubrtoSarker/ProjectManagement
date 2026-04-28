@@ -21,6 +21,6 @@ namespace ProjectManagement.Services.TaskM
         Task<Tasks> GetTask(int TaskID);
         Task<string> TaskUpdate(Tasks task, int USerID);
         Task<List<CompleatedReport>> CompleatedReport(DateTime From, DateTime To, int Enroll);
-
+        Task<string> RequestTimeAdjustment( int taskId, int userId, DateTime date, int status, TimeSpan duration, TimeOnly fromTime, TimeOnly toTime, string reason);
     }
 }
