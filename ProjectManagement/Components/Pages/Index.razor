@@ -116,23 +116,26 @@
                                 @* <p class="fw-bold text-muted">Task Count : @item.TaskCount</p> *@
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <p class="fw-bold text-muted mb-0">Task Count: @item.TaskCount</p>
-                                    <div>
-                                        <button class="btn btn-sm btn-primary me-2"
-                                        @onclick="() => GetProjectID(item.intProjectID)"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#AddTask"
-                                        title="Add Task">
-                                            <i class="bi bi-plus-circle"></i>
-                                        </button>
+                                    @if (item.isCompleate==false)
+                                    {
+                                        <div>
+                                            <button class="btn btn-sm btn-primary me-2"
+                                            @onclick="() => GetProjectID(item.intProjectID)"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#AddTask"
+                                            title="Add Task">
+                                                <i class="bi bi-plus-circle"></i>
+                                            </button>
 
-                                        <button class="btn btn-sm btn-secondary"
-                                        @onclick="() => InitlizeTime(item.intProjectID)"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#AddRequest"
-                                        title="Add Request">
-                                            <i class="bi bi-envelope-plus"></i>
-                                        </button>
-                                    </div>
+                                            <button class="btn btn-sm btn-secondary"
+                                            @onclick="() => InitlizeTime(item.intProjectID)"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#AddRequest"
+                                            title="Add Request">
+                                                <i class="bi bi-envelope-plus"></i>
+                                            </button>
+                                        </div>
+                                    }
                                 </div>
                                 <p class="fw-bold text-muted">Total Users : @item.UserCount</p>
                                 <p class="fw-bold text-@csstext">Due Day : @result @(isPast ? "ago" : "")</p>
@@ -321,6 +324,13 @@
                         <ValidationMessage class="text-danger" For="@(() => newTask.strRequestFrom)" />
                     </div>
                     <div class="row">
+                        <div class="col-md-12">
+                            <label for="RequestDate" class="form-label">Request Date</label>
+                            <input type="date" class="form-control" id="RequestDate" min="@DateTime.Today.AddDays(-7).ToString("yyyy-MM-dd")" max="@DateTime.Today.ToString("yyyy-MM-dd")"  @bind="RequestDate" />
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
                         <div class="col-md-4">
                             <label for="StartTime" class="form-label">Start Time</label>
                             <input type="time" class="form-control" id="StartTime" @oninput="ValidateStartTime" @bind="StartTime" />
@@ -375,6 +385,7 @@
     int RequestID;
     private TimeOnly StartTime { get; set; } = new TimeOnly(DateTime.Now.AddHours(-1).Hour, DateTime.Now.Minute);
     private TimeOnly EndTime { get; set; } = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute);
+    private DateOnly RequestDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
     private TimeSpan TimeStamp => EndTime - StartTime;
     public async void ValidateStartTime(ChangeEventArgs e)
@@ -408,13 +419,13 @@
         ProjectID = Project;
         StartTime = new TimeOnly(DateTime.Now.AddHours(-1).Hour, DateTime.Now.Minute);
         EndTime = new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute);
-        StateHasChanged();
+        RequestDate = DateOnly.FromDateTime(DateTime.Today);
     }
     public async void Request()
     {
         if (StartTime < EndTime)
         {
-            string output = await task.Request(newTask.strTaskName, newTask.strDescription, newTask.strRequestFrom, session.UserID, ProjectID, DateTime.Now, Type, TimeStamp, StartTime.ToString(), EndTime.ToString());
+            string output = await task.Request(newTask.strTaskName, newTask.strDescription, newTask.strRequestFrom, session.UserID, ProjectID, RequestDate.ToDateTime(TimeOnly.MinValue), Type, TimeStamp, StartTime.ToString(), EndTime.ToString());
             if (output.Contains("Success"))
             {
                 await Toast.Success("Success", output, true);
